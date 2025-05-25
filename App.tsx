@@ -1,25 +1,59 @@
-// App.tsx
+// App.tsx (抜粋)
 import React, { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { Alert, View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { TimerStart } from './src/screens/TimerStart';
-import { TimerConfig } from './src/screens/TimerConfig';
-import { TimerSutta } from './src/screens/TimerSutta';
+import { CourseProvider } from './src/context/CourseContext';
+import { ConfigProvider } from './src/context/ConfigContext';
 
-export type RootStackParamList = {
+import TimerStart from './src/screens/TimerStart';
+import TimerConfig from './src/screens/TimerConfig';
+import TimerSutta  from './src/screens/TimerSutta';
+import TimerStop   from './src/screens/TimerStop';
+import  FooterNavigator  from './src/components/Footer/FooterNavigator';
+
+export type RootTabParamList = {
   TimerStart: undefined;
   TimerConfig: undefined;
   TimerSutta: undefined;
 };
+export type RootStackParamList = {
+  MainTabs: undefined;
+  TimerStop: {
+    courseTimes: number[];
+    mode: 'countup' | 'countdown';
+    ringType: string;
+  };
+};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+function MainTabs() {
+  const [active, setActive] = useState<keyof RootTabParamList>('TimerStart');
+
+  const screenMap = {
+    TimerStart : TimerStart,
+    TimerConfig: (props: any) => (
+      <TimerConfig onFinished={() => setActive('TimerStart')} {...props} />
+    ),
+    TimerSutta : TimerSutta,
+  } as const;
+
+  const Screen = screenMap[active];
+
+  return (
+    <View style={styles.flex}>
+      <Screen />
+      <FooterNavigator activeTab={active} onTabChange={setActive} />
+    </View>
+  );
+}
+
+
 export default function App() {
-  // AsyncStorage まわりはそのまま
   const [entries, setEntries] = useState<{ date: string; text: string }[]>([]);
 
   useEffect(() => {
@@ -38,15 +72,19 @@ export default function App() {
   }, [entries]);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="TimerStart"
-        screenOptions={{ headerShown: false }}  // ヘッダーも不要なら隠す
-      >
-        <Stack.Screen name="TimerStart" component={TimerStart} />
-        <Stack.Screen name="TimerConfig" component={TimerConfig} />
-        <Stack.Screen name="TimerSutta" component={TimerSutta} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ConfigProvider>
+      <CourseProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="MainTabs" component={MainTabs} />
+            <Stack.Screen name="TimerStop" component={TimerStop} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </CourseProvider>
+    </ConfigProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+});

@@ -1,193 +1,129 @@
 // src/screens/TimerSutta.tsx
-import React, { FC, useEffect } from 'react'
+import React, { FC } from 'react';
 import {
   SafeAreaView,
-  View,
-  Text,
-  StyleSheet,
   FlatList,
+  View, 
+  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native'
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
-import type { NativeStackScreenProps } from '@react-navigation/native-stack'
+} from 'react-native';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { RootTabParamList } from '../../App';
 
-// フッター共通ナビコンポーネント
-import { FooterWrapper } from   '../components/FooterWrapper'
+import Header from '../components/Header/Header';
+import SuttaRowDisplay from '../components/Body/TimerSutta/SuttaRowDisplay';
 
-// 色違いコンポーネント
-import { Component as SuttaComponent } from '../components/Component'
-import { PauseMizu } from '../components/PauseMizu'
+type Props = BottomTabScreenProps<RootTabParamList, 'TimerSutta'>;
 
 type SuttaItem = {
-  id: string
-  title: string
-  subtitle: string
-  file: any
-}
+  id: string;
+  title: string;
+  subtitle: string;
+  file: any;
+};
 
-type Props = NativeStackScreenProps<any, 'TimerSutta'>
+const suttas: SuttaItem[] = [
+  { id: '1',  title: '諸仏の教え',            subtitle: '(Dhammapada Nos. 183-185)', file: require('../../assets/suttas/buddhanasasana.mp3') },
+  { id: '2',  title: '仏法僧（三宝）の徳の偈文', subtitle: '',                           file: require('../../assets/suttas/0003buddhavandana.mp3') },
+  { id: '3',  title: '三宝に帰依するための偈文', subtitle: 'Tisaraṇa Vandanā',            file: require('../../assets/suttas/0004namami.mp3') },
+  { id: '4',  title: '因縁の教え',              subtitle: 'Paticca Samuppādo',            file: require('../../assets/suttas/0006paticcasamuppado.mp3') },
+  { id: '5',  title: '宝経',                    subtitle: 'Ratana Suttaṃ',                file: require('../../assets/suttas/0008ratanasutta.mp3') },
+  { id: '6',  title: '慈経',                    subtitle: 'Metta Suttaṃ',                 file: require('../../assets/suttas/0009mettasutta.mp3') },
+  { id: '7',  title: '勝利の経',                subtitle: 'Vijaya suttaṃ (Sutta nipāta I_11)', file: require('../../assets/suttas/0010vijayasutta.mp3') },
+  { id: '8',  title: '箭経',                    subtitle: 'Salla suttaṃ',                 file: require('../../assets/suttas/0011sallasutta.mp3') },
+  { id: '9',  title: '偉大なる人の思考',        subtitle: 'Mahā purisa vitakka',           file: require('../../assets/suttas/0012mahapurisavitakka.mp3') },
+  { id: '10', title: '吉祥経',                  subtitle: 'Mangala suttaṃ',               file: require('../../assets/suttas/0013mangalasutta.mp3') },
+  { id: '11', title: '戒め',                    subtitle: 'Sallekha suttaṃ',              file: require('../../assets/suttas/0014sallekhasutta.mp3') },
+  { id: '12', title: '「日々是好日」偈',        subtitle: 'Bhaddekaratta gāthā',          file: require('../../assets/suttas/0015bhaddekarattasutta.mp3') },
+  { id: '13', title: '祝福の偈',                subtitle: 'Āsiṃsanā',                     file: require('../../assets/suttas/0019asimsana.mp3') },
+  { id: '14', title: '慈悲の瞑想',              subtitle: '',                           file: require('../../assets/suttas/metta_bhavana128.mp3') },
+  { id: '15', title: '慈悲の瞑想-ショート',      subtitle: '',                           file: require('../../assets/suttas/jihi_short.mp3') },
+  { id: '16', title: '慈悲の瞑想-フル',         subtitle: '',                           file: require('../../assets/suttas/metta_full.mp3') },
+  { id: '17', title: '日常読誦経典',            subtitle: '',                           file: require('../../assets/suttas/0099nitiyoudokuzyukeiten.mp3') },
+];
 
-export const TimerSutta: FC<Props> = ({ navigation }) => {
-
-  const suttas: SuttaItem[] = [
-    {
-      id: '1',
-      title: '諸仏の教え',
-      subtitle: '(Dhammapada Nos. 183-185)',
-      file: require('../suttas/buddhanasasana.mp3'),
-    },
-    {
-      id: '2',
-      title: '仏法僧（三宝）の徳の偈文',
-      subtitle: 'Tisaraṇa Vandanā',
-      file: require('../suttas/0003buddhavandana.mp3'),
-    },
-    {
-      id: '3',
-      title: '三宝に帰依するための偈文〔日夜の想い〕',
-      subtitle: 'Namami Ca Buddham',
-      file: require('../suttas/0004namami.mp3'),
-    },
-    // ... 他の経典も同様に追加してください ...
-  ]
-
-  const navigate = (tab: 'timer' | 'config' | 'sutta') => {
-    if (tab === 'timer') navigation.navigate('TimerStart')
-    else if (tab === 'config') navigation.navigate('TimerConfig')
-    else navigation.navigate('TimerSutta')
-  }
-
+const TimerSutta: FC<Props> = () => {
   return (
     <SafeAreaView style={styles.safe}>
-      {/* ヘッダー */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>パーリ語日常読誦経典</Text>
-      </View>
+      <Header title="パーリ語日常読誦経典" />
 
-      {/* 経典リスト */}
       <FlatList
         data={suttas}
-        keyExtractor={(i) => i.id}
-        renderItem={({ item }) => <SuttaRow item={item} />}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        renderItem={({ item, index }) => <Row item={item} index={index} />}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
-      {/* フッター */}
-      <FooterWrapper
-        current="sutta"
-        onNavigate={(tab: 'timer' | 'config' | 'sutta') => {
-          if (tab === 'timer') navigation.navigate('TimerStart')
-          else if (tab === 'config') navigation.navigate('TimerConfig')
-          else navigation.navigate('TimerSutta')
-        }}
-      />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-// ————— 小コンポーネント —————
+export default TimerSutta;
 
-const SuttaRow: FC<{ item: SuttaItem }> = ({ item }) => {
-  const player = useAudioPlayer(item.file)
-  const status = useAudioPlayerStatus(player)
-  const isPlaying = status.playing
-  const loading = status.isBuffering || !status.isLoaded
+//─── リスト行コンポーネント ───
+const Row: FC<{ item: SuttaItem; index: number }> = ({ item, index }) => {
+  const player = useAudioPlayer(item.file);
+  const status = useAudioPlayerStatus(player);
+  const isPlaying = status.playing;
+  const loading  = status.isBuffering || !status.isLoaded;
 
-  // 再生／一時停止トグル
   const onPress = () => {
-    if (isPlaying) player.pause()
-    else           player.play()
-  }
+    isPlaying ? player.pause() : player.play();
+  };
 
-  // 再生中であれば PauseMizu、停止中であれば SuttaComponent
-  const RowComponent = isPlaying ? PauseMizu : SuttaComponent
+  // 背景色ロジック
+  let backgroundColor: string;
+  if (loading)             backgroundColor = '#cccccc';
+  else if (isPlaying)      backgroundColor = '#fff095';
+  else if (index % 2 === 0) backgroundColor = '#cfe1f9';
+  else                     backgroundColor = '#ecf3fd';
 
-  return (
-    <View style={styles.item}>
-      <View style={styles.textGroup}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.subtitle}>{item.subtitle}</Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.btn}
-        onPress={onPress}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator size="small" color="#000" />
-        ) : (
-          <RowComponent
-            one={!isPlaying}
-            saiseiIcon={require('../../assets/SaiseiIcon.png')}
-            title={item.title}
-            subtitle={item.subtitle}
-            style={styles.component}
-          />
-        )}
-      </TouchableOpacity>
-    </View>
-  )
-}
-
-// ————— Styles —————
+  return loading ? (
+    <ActivityIndicator
+      style={{ height: 58, marginBottom: 12 }}
+      color="#000"
+    />
+  ) : (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{ marginBottom: 12 }}
+      disabled={loading}
+    >
+      <SuttaRowDisplay
+        title={item.title}
+        subtitle={item.subtitle}
+        backgroundColor={backgroundColor}
+        isPlaying={isPlaying}
+      />
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#90c0e6',
-  },
-  header: {
-    height: 76,
-    backgroundColor: '#9fcaec',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerText: {
-    color: '#fff',
-    fontSize: 26,
-    fontWeight: '500',
-  },
+  safe: { flex: 1, backgroundColor: '#90c0e6' },
   list: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    // 上端と下端の余白も PDF に合わせて調整
+    paddingTop: 8,
+    paddingBottom: 16,
   },
+  separator: {
+    height: 0, // アイテム間の間隔
+  },
+  loading: {
+    height: 58,
+    marginBottom: 0, // 読み込み中インジケータの下マージンも同じに
+  },
+});
 
-  item: {
+const footerStyles = StyleSheet.create({
+  container: {
     flexDirection: 'row',
-    borderRadius: 15,
-    marginBottom: 10,
-    height: 72,
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    height: 64,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
   },
-  textGroup: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#333',
-    marginTop: 4,
-  },
-  btn: {
-    width: 58,
-    height: 58,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  component: {
-    width: 58,
-    height: 58,
-  },
-})
-
-export default TimerSutta
+});

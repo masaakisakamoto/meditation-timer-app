@@ -1,151 +1,206 @@
 // src/screens/TimerStop.tsx
-import React, { useState, useEffect, FC } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Image,
-  Dimensions,
-} from 'react-native';
+import React, { FC, useState, useEffect, useMemo, useContext } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import { useAudioPlayer } from 'expo-audio';
+import type { AudioPlayer, AudioStatus } from 'expo-audio';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-// アセット
-import stopIcon  from '../../assets/StopButton.png';
-import pauseIcon from '../../assets/PauseButton.png';
-import diaryIcon from '../../assets/DiaryButton.png';
+import Header     from '../components/Header/Header';
+import AlermTime  from '../components/Body/TimerStop/AlermTime';
+import Timer      from '../components/Body/TimerStop/Timer';
+import { RootStackParamList } from '../../App';
+import { ConfigContext }      from '../context/ConfigContext';
 
-// 共通フッター
-import { FooterCommon } from '../components/FooterCommon';
+type Props = NativeStackScreenProps<RootStackParamList, 'TimerStop'>;
 
-type Props = NativeStackScreenProps<any, 'TimerStop'>;
+/* -------------------------------------------------- */
+/** AudioPlayer を再生し、再生完了まで待つ */
+const playAndWait = (player: AudioPlayer) =>
+  new Promise<void>(resolve => {
+    let hasStarted = false;
+    const sub = player.addListener(
+      'playbackStatusUpdate',
+      (status: AudioStatus) => {
+        if (!hasStarted && status.playing) {
+          hasStarted = true;
+        }
+        if (hasStarted && !status.playing) {
+          sub.remove();          // 監視解除
+          resolve();             // Promise 完了
+        }
+      }
+    );
+    player.play();               // 再生スタート
+  });
 
-export const TimerStop: FC<Props> = ({ navigation }) => {
-  // State: 経過秒と再生状態
-  const [elapsed, setElapsed]     = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+/** おりんを鳴らす */
+const playBell = async (player: AudioPlayer) => {
+  try {
+    await player.play();
+  } catch (error) {
+    console.error('Bell play error:', error);
+  }
+};
 
-  // Timer エフェクト
+export const TimerStop: FC<Props> = ({ route, navigation }) => {
+  const { courseTimes } = route.params;
+  const { config }      = useContext(ConfigContext)!;
+  const { mode, ringType, readingOn } = config;
+
+  /* ---------- 時間計算 ---------- */
+  const cumulativeSecs = useMemo(
+    () =>
+      courseTimes
+        .map(m => m * 60)
+        .reduce<number[]>((a, s, i) => {
+          a.push((i ? a[i - 1] : 0) + s);
+          return a;
+        }, []),
+    [courseTimes]
+  );
+  const totalSec = cumulativeSecs.at(-1) ?? 0;
+
+  /* ---------- カウント状態 ---------- */
+  const [sec, setSec]         = useState(mode === 'countup' ? 0 : totalSec);
+  const [isPlaying, setPlaying] = useState(false);
+  const [nextIdx, setNextIdx] = useState(0);
+
   useEffect(() => {
-    let id: ReturnType<typeof setInterval>;
+    // タイマー開始時に nextIdx をリセット
     if (isPlaying) {
-      id = setInterval(() => setElapsed(e => e + 1), 1000);
+      setNextIdx(0);
     }
-    return () => clearInterval(id);
   }, [isPlaying]);
 
-  // hh:mm:ss に整形
-  const fmt = (s: number) => {
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const t = s % 60;
-    return `${h.toString().padStart(2,'0')}:${m
-      .toString()
-      .padStart(2,'0')}:${t.toString().padStart(2,'0')}`;
+  /* ---------- サウンド ---------- */
+  const orinAssets: Record<string, any> = {
+    '1':  require('../../assets/mp3/horin.mp3'),
+    '2':  require('../../assets/mp3/norin.mp3'),
+    '3':  require('../../assets/mp3/senkyoujityurin.mp3'),
+    '4':  require('../../assets/mp3/senkyoujidairin.mp3'),
+    '5':  require('../../assets/mp3/orin_housenji.m4a'),
+    '6':  require('../../assets/mp3/senkyoujiorin1.mp3'),
+    '7':  require('../../assets/mp3/senkyoujiorin2.mp3'),
+    '8':  require('../../assets/mp3/senkyoujiorin3.mp3'),
+    '9':  require('../../assets/mp3/senkyoujiorin4.mp3'),
+    '10': require('../../assets/mp3/鐘1_20241110_173133.m4a'),
   };
 
-  // ハンドラ
-  const onStop   = () => {
-    setIsPlaying(false);
-    setElapsed(0);
-    navigation.navigate('TimerStart');
-  };
-  const onPause  = () => setIsPlaying(p => !p);
+  // 各タイミング用の個別のプレイヤー
+  const startOrinPlayer = useAudioPlayer(orinAssets[ringType]);
+  const firstOrinPlayer = useAudioPlayer(orinAssets[ringType]);
+  const secondOrinPlayer = useAudioPlayer(orinAssets[ringType]);
+  const thirdOrinPlayer = useAudioPlayer(orinAssets[ringType]);
+  const suttaPlayer = useAudioPlayer(
+    readingOn ? require('../../assets/suttas/0001tisarana.mp3') : null
+  );
 
+  /* ---------- 起動シーケンス ---------- */
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      try {
+        if (readingOn) {
+          await playAndWait(suttaPlayer);   // 読経
+          if (!alive) return;
+        }
+        if (alive) {
+          await playAndWait(startOrinPlayer);      // おりん（1回だけ）
+          if (!alive) return;
+          setPlaying(true);                   // タイマー開始
+        }
+      } catch (e) {
+        setPlaying(true);                   // エラー時でも進行
+      }
+    })();
+
+    return () => { alive = false };
+  }, []);
+
+  /* ---------- 1 秒ごとカウント ---------- */
+  useEffect(() => {
+    if (!isPlaying) return;
+    const id = setInterval(() => {
+      setSec(p => (mode === 'countup' ? p + 1 : p - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isPlaying, mode]);
+
+  /* ---------- おりん & 終了判定 ---------- */
+  useEffect(() => {
+    // カウントアップの場合はそのままの秒数、カウントダウンの場合は経過秒数を計算
+    const elapsedSec = mode === 'countup' ? sec : totalSec - sec;
+
+    // 次のおりんのタイミングに達したかチェック
+    if (nextIdx < cumulativeSecs.length && elapsedSec >= cumulativeSecs[nextIdx]) {
+      // インデックスに応じたプレイヤーを選択
+      const currentPlayer = nextIdx === 0 ? firstOrinPlayer :
+                          nextIdx === 1 ? secondOrinPlayer :
+                                        thirdOrinPlayer;
+
+      // おりんを鳴らす
+      try {
+        currentPlayer.play();
+        const newNextIdx = nextIdx + 1;
+        setNextIdx(newNextIdx);
+      } catch (error) {
+        console.error('Bell play error:', error);
+      }
+    }
+
+    if (
+      (mode === 'countup' && sec >= totalSec) ||
+      (mode === 'countdown' && sec <= 0)
+    ) {
+      setPlaying(false);
+    }
+  }, [sec, nextIdx, mode, totalSec, cumulativeSecs, firstOrinPlayer, secondOrinPlayer, thirdOrinPlayer]);
+
+  // 再生状態の監視
+  useEffect(() => {
+    const subscription = startOrinPlayer.addListener(
+      'playbackStatusUpdate',
+      (status) => {
+        if (status.didJustFinish) {
+          startOrinPlayer.play();
+          startOrinPlayer.pause();
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [startOrinPlayer]);
+
+  /* ---------- 表示文字列 ---------- */
+  const displayTime = new Date(sec * 1000).toISOString().substring(11, 19);
+
+  /* ---------- UI ---------- */
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* ヘッダー */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Timer</Text>
-      </View>
-
-      {/* 本文 */}
-      <View style={styles.body}>
-        {/* アラーム時間（固定表示例） */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>アラーム時間</Text>
-          <View style={styles.alarmRow}>
-            <Text style={styles.alarmTxt}>00</Text>
-            <Text style={styles.alarmTxt}>00</Text>
-            <Text style={styles.alarmTxt}>00</Text>
-          </View>
-        </View>
-
-        {/* タイマー円 */}
-        <View style={styles.timerContainer}>
-          <View style={styles.circle}>
-            <Text style={styles.timerText}>{fmt(elapsed)}</Text>
-            <View style={styles.controls}>
-              <Pressable style={styles.ctrlBtn} onPress={onStop}>
-                <Image source={stopIcon}  style={styles.ctrlIcon} />
-              </Pressable>
-              <Pressable style={styles.ctrlBtn} onPress={onPause}>
-                <Image source={pauseIcon} style={styles.ctrlIcon} />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* 日記ボタン */}
-          <Pressable style={styles.diaryBtn}>
-            <Image source={diaryIcon} style={styles.diaryIcon} />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* 共通フッター */}
-      <FooterCommon
-        onPressTimer={() => navigation.navigate('TimerStart')}
-        onPressConfig={() => navigation.navigate('TimerConfig')}
-        onPressSutta={() => navigation.navigate('TimerSutta')}
-      />
+    <SafeAreaView style={styles.container}>
+      <Header title="Timer" />
+      <ScrollView contentContainerStyle={styles.body}>
+        <Timer
+          time={displayTime}
+          isPlaying={isPlaying}
+          onTogglePause={() => setPlaying(p => !p)}
+          onStop={() => navigation.goBack()}
+        />
+        <AlermTime times={[
+          courseTimes[0] ?? 0,
+          courseTimes[1] ?? 0,
+          courseTimes[2] ?? 0,
+        ]}/>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-const { width } = Dimensions.get('window');
-const C = width * 0.8;  // 円のサイズ
-
 const styles = StyleSheet.create({
-  safe: { flex:1, backgroundColor:'#e0eef9' },
-  header: { height:92, justifyContent:'flex-end', alignItems:'center' },
-  headerTitle:{
-    fontSize:32,
-    fontWeight:'500',
-    color:'#fff',
-    backgroundColor:'#9fcaec',
-    width:'100%',
-    textAlign:'center',
-    paddingVertical:16
-  },
-
-  body:{ flex:1, alignItems:'center', paddingTop:16 },
-  section:{ width:'90%', marginVertical:16 },
-  sectionTitle:{ fontSize:20, fontWeight:'500', marginBottom:8 },
-  alarmRow:{ flexDirection:'row', justifyContent:'space-between' },
-  alarmTxt:{ fontSize:32, fontWeight:'500' },
-
-  timerContainer:{ alignItems:'center', marginTop:24 },
-  circle:{
-    width:C,
-    height:C,
-    borderRadius:C/2,
-    backgroundColor:'#fefbd0',
-    justifyContent:'center',
-    alignItems:'center'
-  },
-  timerText:{
-    fontSize:72,
-    fontWeight:'400',
-    position:'absolute',
-    top:C/3
-  },
-  controls:{ flexDirection:'row', position:'absolute', bottom:40 },
-  ctrlBtn:{ marginHorizontal:8, padding:8 },
-  ctrlIcon:{ width:32, height:32 },
-
-  diaryBtn:{ position:'absolute', top:-16, right:-16 },
-  diaryIcon:{ width:40, height:40 },
-
-  footerBtn:{}, // FooterCommon 側で制御
+  container: { flex: 1, backgroundColor: '#e0eef9' },
+  body:      { paddingVertical: 20, alignItems: 'center' },
 });
+
+export default TimerStop;

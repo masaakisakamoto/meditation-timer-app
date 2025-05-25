@@ -1,68 +1,54 @@
-// src/components/DiaryButtonWrapper.tsx
+// src/components/Body/YourComponent/DiaryButton.tsx
 import React, { FC } from 'react';
-import { Pressable, View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 
-// Web版で使っていたアイコン
-import vectorIcon from '../../assets/Vector.png'; 
+// SVG は require() で読み込み、<Image> で描画します
+const ellipseIcon = require('../../../assets/Ellipse1.svg');
+const vectorIcon  = require('../../../assets/Vector.svg');
 
-export const DiaryButtonWrapper: FC<{ onPress?: () => void }> = ({ onPress }) => {
-  return (
-    <Pressable style={styles.wrapper} onPress={onPress}>
-      <View style={styles.button}>
-        <View style={styles.ellipseParent}>
-          <View style={styles.groupChild} />
-          <Image source={vectorIcon} style={styles.vectorIcon} />
-          <Text style={styles.diaryText}>Diary</Text>
-        </View>
-      </View>
-    </Pressable>
-  );
+type Props = {
+  onPress?: () => void;
 };
 
+const DiaryButton: FC<Props> = ({ onPress }) => (
+  <Pressable style={styles.container} onPress={onPress}>
+    <Image source={ellipseIcon} style={styles.ellipse} />
+    <Image source={vectorIcon} style={styles.vector} />
+    <Text style={styles.label}>Diary</Text>
+  </Pressable>
+);
+
+export default DiaryButton;
+
 const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-    height: 52,
-    justifyContent: 'center',
-  },
-  button: {
+  container: {
+    position: 'absolute',
+    top: 26,
+    right: 0,
     width: 52,
     height: 52,
-    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  ellipseParent: {
+  ellipse: {
     position: 'absolute',
-    top: '-46.15%',
-    left: 0,
-    right: '-232.12%',
-    bottom: '-90.96%',
-    width: 332.12 * 0.52, // 元CSS比率を掛け合わせています
-    height: 237.12 * 0.52,
-  },
-  groupChild: {
-    position: 'absolute',
-    top: '0.22%',
-    left: '0.16%',
-    width: '35.73%',
-    height: '48.18%',
-    borderRadius: 26,
-    backgroundColor: '#f7d3dd',
-  },
-  vectorIcon: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '36.07%',
-    height: '48.58%',
+    width: 52,
+    height: 52,
     resizeMode: 'contain',
   },
-  diaryText: {
+  vector: {
     position: 'absolute',
-    top: 45,
-    left: 17,
+    width: 52,
+    height: 52,
+    resizeMode: 'contain',
+  },
+  label: {
+    position: 'absolute',
+    bottom: -18,
     fontSize: 11,
+    letterSpacing: 0.3,
     fontWeight: '500',
-    fontFamily: 'Josefin Sans',
-    color: '#000',
+    fontFamily: 'JosefinSans-Medium',
+    color: '#fff',
   },
 });
