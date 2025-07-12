@@ -14,7 +14,7 @@ const ActionButtons: FC<Props> = ({ onReset, onSave }) => (
     </Pressable>
     {/* 保存 */}
     <Pressable style={[styles.button, styles.save]} onPress={onSave}>
-      <Text style={styles.saveText}>マイコースとして{"\n"}保存</Text>
+      <Text style={styles.saveText}>マイコース{"\n"}として保存</Text>
     </Pressable>
   </View>
 );

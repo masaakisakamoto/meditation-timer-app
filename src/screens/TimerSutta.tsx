@@ -1,5 +1,5 @@
 // src/screens/TimerSutta.tsx
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   SafeAreaView,
   FlatList,
@@ -25,26 +25,28 @@ type SuttaItem = {
 };
 
 const suttas: SuttaItem[] = [
-  { id: '1',  title: '諸仏の教え',            subtitle: '(Dhammapada Nos. 183-185)', file: require('../../assets/suttas/buddhanasasana.mp3') },
-  { id: '2',  title: '仏法僧（三宝）の徳の偈文', subtitle: '',                           file: require('../../assets/suttas/0003buddhavandana.mp3') },
-  { id: '3',  title: '三宝に帰依するための偈文', subtitle: 'Tisaraṇa Vandanā',            file: require('../../assets/suttas/0004namami.mp3') },
-  { id: '4',  title: '因縁の教え',              subtitle: 'Paticca Samuppādo',            file: require('../../assets/suttas/0006paticcasamuppado.mp3') },
-  { id: '5',  title: '宝経',                    subtitle: 'Ratana Suttaṃ',                file: require('../../assets/suttas/0008ratanasutta.mp3') },
-  { id: '6',  title: '慈経',                    subtitle: 'Metta Suttaṃ',                 file: require('../../assets/suttas/0009mettasutta.mp3') },
-  { id: '7',  title: '勝利の経',                subtitle: 'Vijaya suttaṃ (Sutta nipāta I_11)', file: require('../../assets/suttas/0010vijayasutta.mp3') },
-  { id: '8',  title: '箭経',                    subtitle: 'Salla suttaṃ',                 file: require('../../assets/suttas/0011sallasutta.mp3') },
-  { id: '9',  title: '偉大なる人の思考',        subtitle: 'Mahā purisa vitakka',           file: require('../../assets/suttas/0012mahapurisavitakka.mp3') },
-  { id: '10', title: '吉祥経',                  subtitle: 'Mangala suttaṃ',               file: require('../../assets/suttas/0013mangalasutta.mp3') },
-  { id: '11', title: '戒め',                    subtitle: 'Sallekha suttaṃ',              file: require('../../assets/suttas/0014sallekhasutta.mp3') },
-  { id: '12', title: '「日々是好日」偈',        subtitle: 'Bhaddekaratta gāthā',          file: require('../../assets/suttas/0015bhaddekarattasutta.mp3') },
-  { id: '13', title: '祝福の偈',                subtitle: 'Āsiṃsanā',                     file: require('../../assets/suttas/0019asimsana.mp3') },
-  { id: '14', title: '慈悲の瞑想',              subtitle: '',                           file: require('../../assets/suttas/metta_bhavana128.mp3') },
-  { id: '15', title: '慈悲の瞑想-ショート',      subtitle: '',                           file: require('../../assets/suttas/jihi_short.mp3') },
-  { id: '16', title: '慈悲の瞑想-フル',         subtitle: '',                           file: require('../../assets/suttas/metta_full.mp3') },
-  { id: '17', title: '日常読誦経典',            subtitle: '',                           file: require('../../assets/suttas/0099nitiyoudokuzyukeiten.mp3') },
+  { id: '1',  title: '仏法僧（三宝）の徳の偈文', subtitle: '',                           file: require('../../assets/suttas/0003buddhavandana.mp3') },
+  { id: '2',  title: '諸仏の教え', subtitle: 'Buddhanasasana',            file: require('../../assets/suttas/0005buddhanasasana.mp3') },
+  { id: '3',  title: '因縁の教え',              subtitle: 'Paticca Samuppādo',            file: require('../../assets/suttas/0006paticcasamuppado.mp3') },
+  { id: '4',  title: '宝経',                    subtitle: 'Ratana Suttaṃ',                file: require('../../assets/suttas/0008ratanasutta.mp3') },
+  { id: '5',  title: '慈経',                    subtitle: 'Metta Suttaṃ',                 file: require('../../assets/suttas/0009mettasutta.mp3') },
+  { id: '6',  title: '勝利の経',                subtitle: 'Vijaya suttaṃ (Sutta nipāta I_11)', file: require('../../assets/suttas/0010vijayasutta.mp3') },
+  { id: '7',  title: '箭経',                    subtitle: 'Salla suttaṃ',                 file: require('../../assets/suttas/0011sallasutta.mp3') },
+  { id: '8',  title: '偉大なる人の思考',        subtitle: 'Mahā purisa vitakka',           file: require('../../assets/suttas/0012mahapurisavitakka.mp3') },
+  { id: '9', title: '「日々是好日」偈',        subtitle: 'Bhaddekaratta gāthā',          file: require('../../assets/suttas/0015bhaddekarattasutta.mp3') },
+  { id: '10', title: '祝福の偈',                subtitle: 'Āsiṃsanā',                     file: require('../../assets/suttas/0019asimsana.mp3') },
+  { id: '11', title: '慈悲の瞑想',              subtitle: '',                           file: require('../../assets/suttas/0020jihinomeiso.mp3') },
+  { id: '12', title: '回向の文',            subtitle: '',                           file: require('../../assets/suttas/0021ekonomon.mp3') },
 ];
 
 const TimerSutta: FC<Props> = () => {
+  // 現在再生中の経典のIDを管理
+  const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
+  // 最後に再生していた経典のIDを管理
+  const [lastPlayedId, setLastPlayedId] = useState<string | null>(null);
+  // プレーヤーの再作成を制御するカウンター
+  const [playerKey, setPlayerKey] = useState(0);
+
   return (
     <SafeAreaView style={styles.safe}>
       <Header title="パーリ語日常読誦経典" />
@@ -53,25 +55,103 @@ const TimerSutta: FC<Props> = () => {
         data={suttas}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item, index }) => <Row item={item} index={index} />}
+        renderItem={({ item, index }) => (
+          <AudioPlayer
+            key={`${item.id}-${playerKey}`}
+            item={item}
+            index={index}
+            isCurrentPlaying={currentPlayingId === item.id}
+            onPlayStateChange={(isPlaying) => {
+              if (isPlaying) {
+                // 別の経典を再生する場合はプレーヤーを再作成
+                if (currentPlayingId !== item.id && lastPlayedId !== item.id) {
+                  setPlayerKey(prev => prev + 1);
+                }
+                setCurrentPlayingId(item.id);
+                setLastPlayedId(item.id);
+              } else {
+                setCurrentPlayingId(null);
+              }
+            }}
+            stopIfOtherPlaying={currentPlayingId !== null && currentPlayingId !== item.id}
+            shouldRestartFromBeginning={lastPlayedId !== item.id}
+          />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-
     </SafeAreaView>
   );
 };
 
 export default TimerSutta;
 
-//─── リスト行コンポーネント ───
-const Row: FC<{ item: SuttaItem; index: number }> = ({ item, index }) => {
+//─── オーディオプレーヤーコンポーネント ───
+type AudioPlayerProps = {
+  item: SuttaItem;
+  index: number;
+  isCurrentPlaying: boolean;
+  onPlayStateChange: (isPlaying: boolean) => void;
+  stopIfOtherPlaying: boolean;
+  shouldRestartFromBeginning: boolean;
+};
+
+const AudioPlayer: FC<AudioPlayerProps> = ({
+  item,
+  index,
+  isCurrentPlaying,
+  onPlayStateChange,
+  stopIfOtherPlaying,
+  shouldRestartFromBeginning
+}) => {
   const player = useAudioPlayer(item.file);
   const status = useAudioPlayerStatus(player);
   const isPlaying = status.playing;
-  const loading  = status.isBuffering || !status.isLoaded;
+  const loading = status.isBuffering || !status.isLoaded;
+  const [isPaused, setIsPaused] = useState(false);
+
+  // 再生終了時の処理
+  useEffect(() => {
+    if (status.isLoaded && status.didJustFinish) {
+      onPlayStateChange(false);
+      setIsPaused(false);
+    }
+  }, [status.didJustFinish]);
+
+  // 他の経典が再生開始されたら停止
+  useEffect(() => {
+    if (stopIfOtherPlaying && isPlaying) {
+      player.pause();
+      onPlayStateChange(false);
+      setIsPaused(true);
+    }
+  }, [stopIfOtherPlaying]);
+
+  // 再生状態が変更されたときの処理
+  useEffect(() => {
+    if (isCurrentPlaying && !isPlaying) {
+      player.play();
+    }
+  }, [isCurrentPlaying]);
 
   const onPress = () => {
-    isPlaying ? player.pause() : player.play();
+    if (isPlaying) {
+      // 同じ経典をタップ: 一時停止
+      player.pause();
+      onPlayStateChange(false);
+      setIsPaused(true);
+    } else {
+      // 再生開始
+      if (!isPaused || shouldRestartFromBeginning) {
+        // 新規再生または別の経典から戻ってきた場合は最初から
+        player.pause();
+        player.play();
+        setIsPaused(false);
+      } else {
+        // 一時停止からの再開
+        player.play();
+      }
+      onPlayStateChange(true);
+    }
   };
 
   // 背景色ロジック
@@ -106,16 +186,15 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#90c0e6' },
   list: {
     paddingHorizontal: 16,
-    // 上端と下端の余白も PDF に合わせて調整
     paddingTop: 8,
     paddingBottom: 16,
   },
   separator: {
-    height: 0, // アイテム間の間隔
+    height: 0,
   },
   loading: {
     height: 58,
-    marginBottom: 0, // 読み込み中インジケータの下マージンも同じに
+    marginBottom: 0,
   },
 });
 

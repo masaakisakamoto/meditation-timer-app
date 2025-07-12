@@ -6,6 +6,7 @@ export type Orin = {
   id: string;
   name: string;
   image: any; // require(...) で渡す
+  sound: any; // 音声ファイルを require(...) で指定
 };
 
 type Props = {
@@ -19,8 +20,13 @@ const OrinButton: FC<Props> = ({ selected, onPress }) => {
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.background} />
-      <Text style={styles.label}>＞おりんの種類：{selected.name}</Text>
-      {/* 下中央にはみ出す形でアイコンを絶対配置 */}
+      <Text 
+        style={styles.label}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        ＞おりんの種類：{selected.name}
+      </Text>
       <Image source={selected.image} style={styles.icon} />
     </Pressable>
   );
@@ -31,25 +37,25 @@ export default OrinButton;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 80,               // TimerModeToggle と同じ高さ
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
     marginVertical: 12,
-	marginBottom: 40,
+    marginBottom: 40,
   },
   background: {
     position: "absolute",
     top: 0,
-    width: "90%",             // Toggle と同様に内側に余白を取るなら 90%
-    height: 60,               // Toggle ボタンと同じ高さ
+    width: "90%",
+    height: 60,
     backgroundColor: "#fcdfa5",
     borderRadius: 15,
-	left: "5%",
+    left: "5%",
   },
   label: {
     position: "absolute",
-    top: 15,            // 少し下げて中央寄せ
+    top: 15,
     fontSize: 20,
     lineHeight: 25,
     letterSpacing: -0.4,
@@ -58,13 +64,17 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "center",
     width: "80%",
+    flexShrink: 1,
+    paddingHorizontal: 10,
   },
   icon: {
     position: "absolute",
-    bottom: -60,           // 背景の下にはみ出す
-    alignSelf: "center",      // 横方向中央
-    width: 80,               // Toggle と同じアイコンサイズ
-    height: 80,
-    resizeMode: "contain",
+    bottom: -50,
+    alignSelf: "center",
+    width: 60,
+    height: 60,
+    resizeMode: "cover",
+    borderRadius: 30,
+    zIndex: 1,
   },
 });

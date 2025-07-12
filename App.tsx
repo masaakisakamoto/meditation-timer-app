@@ -13,18 +13,19 @@ import TimerStart from './src/screens/TimerStart';
 import TimerConfig from './src/screens/TimerConfig';
 import TimerSutta  from './src/screens/TimerSutta';
 import TimerStop   from './src/screens/TimerStop';
-import  FooterNavigator  from './src/components/Footer/FooterNavigator';
+import FooterNavigator from './src/components/Footer/FooterNavigator';
 
 export type RootTabParamList = {
   TimerStart: undefined;
   TimerConfig: undefined;
   TimerSutta: undefined;
 };
+
 export type RootStackParamList = {
   MainTabs: undefined;
   TimerStop: {
     courseTimes: number[];
-    mode: 'countup' | 'countdown';
+    mode: 'countdown' | 'countup';
     ringType: string;
   };
 };
@@ -34,24 +35,26 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function MainTabs() {
   const [active, setActive] = useState<keyof RootTabParamList>('TimerStart');
 
-  const screenMap = {
-    TimerStart : TimerStart,
-    TimerConfig: (props: any) => (
-      <TimerConfig onFinished={() => setActive('TimerStart')} {...props} />
-    ),
-    TimerSutta : TimerSutta,
-  } as const;
-
-  const Screen = screenMap[active];
+  const renderScreen = () => {
+    switch (active) {
+      case 'TimerStart':
+        return <TimerStart />;
+      case 'TimerConfig':
+        return <TimerConfig onFinished={() => setActive('TimerStart')} />;
+      case 'TimerSutta':
+        return <TimerSutta />;
+      default:
+        return <TimerStart />;
+    }
+  };
 
   return (
     <View style={styles.flex}>
-      <Screen />
+      {renderScreen()}
       <FooterNavigator activeTab={active} onTabChange={setActive} />
     </View>
   );
 }
-
 
 export default function App() {
   const [entries, setEntries] = useState<{ date: string; text: string }[]>([]);

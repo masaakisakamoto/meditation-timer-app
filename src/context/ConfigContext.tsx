@@ -54,8 +54,22 @@ import React, {
     const setMode = (mode: Mode) =>
       setConfig(prev => ({ ...prev, mode }));
   
-    const setRingType = (ringType: string) =>
-      setConfig(prev => ({ ...prev, ringType }));
+    const setRingType = async (ringType: string) => {
+      // 設定を更新
+      setConfig(prev => {
+        const newConfig = { ...prev, ringType };
+        console.log('Updating config:', newConfig);
+        return newConfig;
+      });
+
+      // AsyncStorageに保存
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...config, ringType }));
+        console.log('Config saved to AsyncStorage');
+      } catch (error) {
+        console.error('Error saving config:', error);
+      }
+    };
   
     /* ON/OFF をトグルするだけで良いので bool flip に */
     const toggleReading = () =>

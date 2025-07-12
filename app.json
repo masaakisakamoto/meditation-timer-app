@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "meditation-timer-app",
-    "slug": "meditation-timer-app",
+    "name": "ミッター・タイマー",
+    "slug": "ミッター・タイマー",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

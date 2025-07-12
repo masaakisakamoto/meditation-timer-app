@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 10,
   },
   // 背景色
   downBg: { backgroundColor: "#fcdfa5" },
@@ -77,9 +78,9 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textAlign: "center",
     position: "absolute",
-    transform: [{
-      translateX: 20
-    }],
+    left: "25%",    // 左から25%の位置に配置
+    right: "5%",    // 右端の余白5%
+    flexShrink: 1,  // テキストを縮小可能に
   },
   downText: { color: "#000" },
   upText: { color: "#000" },
@@ -88,20 +89,16 @@ const styles = StyleSheet.create({
   indicator: {
     position: "absolute",
     borderRadius: 12,
-  },
-  downInd: {
     width: "20%",
     height: "60%",
-    backgroundColor: "#fff095",
     left: "5%",
     top: "20%",
   },
+  downInd: {
+    backgroundColor: "#fff095",
+  },
   upInd: {
-    width: "20%",
-    height: "60%",
     backgroundColor: "#f9c04c",
-    right: "75%",
-    top: "20%",
   },
 
   // サンプル数字
@@ -110,15 +107,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "GothicA1-Medium",
     fontWeight: "500",
-  },
-  downSample: {
-    color: "#aba686",
     left: "8%",
     top: "30%",
   },
+  downSample: {
+    color: "#aba686",
+  },
   upSample: {
     color: "#fff",
-    left: "8%",   // countdown と同じ位置に固定
-    top: "30%",
   },
 });

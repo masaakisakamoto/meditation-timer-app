@@ -1,47 +1,51 @@
 // src/components/Footer/FooterNavigator.tsx
 import React from 'react';
-import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { View, Pressable, Text, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PatternA from '../../../assets/FooterButtonA.svg';
 import PatternB from '../../../assets/FooterButtonB.svg';
 import { RootTabParamList } from '../../../App';
 
-type FooterNavigatorProps = {
+type Props = {
   activeTab: keyof RootTabParamList;
   onTabChange: (tab: keyof RootTabParamList) => void;
 };
 
-const FooterNavigator: React.FC<FooterNavigatorProps> = ({
-  activeTab,
-  onTabChange,
-}) => {
-  const tabs: Array<{ name: keyof RootTabParamList; label: string }> = [
-    { name: 'TimerStart',  label: 'タイマー'        },
+const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
+  const insets = useSafeAreaInsets();          // ←★ ここで取得
+  const tabs = [
+    { name: 'TimerStart',  label: 'タイマー' },
     { name: 'TimerConfig', label: 'タイマー\n設定' },
-    { name: 'TimerSutta',  label: '経典'            },
-  ];
-
-  // 背景色をタブによって切り替え
-  const containerBg =
-    activeTab === 'TimerSutta' ? styles.containerSutta : styles.containerDefault;
+    { name: 'TimerSutta',  label: '経典' },
+  ] as const;
 
   return (
-    <View style={[styles.container, containerBg]}>
+    <View
+      style={[
+        styles.container,
+        {
+          /* 🔽 Androidでも iPhone X でもピッタリ浮かせる */
+          paddingBottom: Math.max(insets.bottom, 6),
+          height: 64 + Math.max(insets.bottom, 6),
+          elevation: 6,          // Android 用
+          zIndex: 10,            // iOS 用
+        },
+      ]}
+    >
       {tabs.map(tab => {
-        const isActive = activeTab === tab.name;
-        const Icon = isActive ? PatternB : PatternA;
+        const Icon = activeTab === tab.name ? PatternB : PatternA;
         return (
           <Pressable
             key={tab.name}
             style={styles.button}
+            android_ripple={{ color: '#00000022', borderless: false }}
             onPress={() => onTabChange(tab.name)}
           >
             <Icon width="100%" height="100%" />
-            <Text
-              style={[
-                styles.label,
-                isActive ? styles.labelActive : styles.labelInactive,
-              ]}
-            >
+            <Text style={[
+              styles.label,
+              activeTab === tab.name ? styles.labelActive : styles.labelInactive,
+            ]}>
               {tab.label}
             </Text>
           </Pressable>
@@ -56,19 +60,13 @@ export default FooterNavigator;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: 64,
-  },
-  containerDefault: {
     backgroundColor: '#E0EEF9',
-  },
-  containerSutta: {
-    backgroundColor: '#90C0E6',
   },
   button: {
     flex: 1,
-    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   label: {
     position: 'absolute',
@@ -76,10 +74,6 @@ const styles = StyleSheet.create({
     fontFamily: 'ZenMaruGothic-Medium',
     textAlign: 'center',
   },
-  labelActive: {
-    color: '#FEEF94',
-  },
-  labelInactive: {
-    color: '#000',
-  },
+  labelActive:   { color: '#FEEF94' },
+  labelInactive: { color: '#000'    },
 });
