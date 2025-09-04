@@ -60,24 +60,24 @@ const TimerStartDisplay: FC<TimerProps> = ({
 export default TimerStartDisplay;
 
 const styles = StyleSheet.create({
-  timer: { width: "80%", height: 344, position: "relative" },
+  timer: { width: "75%", height: 280, position: "relative" },
   timerBackground: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
     width: "100%", height: "100%"
   },
   startButton: {
-    position: "absolute", top: "67%", left: "26%",
+    position: "absolute", top: "70%", left: "26%",
     width: "47%", height: "13%", alignItems: "center", justifyContent: "center",
   },
   startCircle: {
-    position: "absolute", top: "-6.6%", left: "-1.8%",
+    position: "absolute", top: "-8.6%", left: "-1.8%",
     right: "-1.8%", bottom: "-6.6%",
     backgroundColor: "#fff79a",
     borderWidth: 3,
     borderColor: "#f8cd71",
     borderRadius: 24
   },
-  startIcon: { width: 31, height: 34, resizeMode: "contain" },
+  startIcon: { width: 31, height: 25, resizeMode: "contain" },
    readingButton: {
 	   position: "absolute", top: "18%", left: "26%",
 	   width: "47%", height: "14%", alignItems: "center", justifyContent: "center"
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     position: "absolute"
   },
   timeText: {
-    position: "absolute", top: 130, left: 26,
+    position: "absolute", top: 100, left: 20,
     fontFamily: "DidactGothic-Regular",
     fontSize: 60,
     color: "#000"

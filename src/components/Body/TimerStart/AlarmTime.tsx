@@ -33,15 +33,15 @@ export default AlarmTime;
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    paddingHorizontal: 20,
-    marginVertical: 12,
+    width: '95%',
+    paddingHorizontal: 18,
+    marginVertical: 10,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     fontFamily: 'ZenMaruGothic-Medium',
-    marginBottom: 8,
+    marginBottom: 0,
 	textAlign: 'center',  
 
   },
@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 40,
   },
   timeBox: {
     flexDirection: 'row',
@@ -67,5 +67,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '500',
     fontFamily: 'ZenMaruGothic-Medium',
+    marginBottom: 4,
   },
 });

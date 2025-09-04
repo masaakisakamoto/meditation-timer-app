@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   label: {
     position: "absolute",
-    top: 15,
+    top: 18,
     fontSize: 20,
     lineHeight: 25,
     letterSpacing: -0.4,

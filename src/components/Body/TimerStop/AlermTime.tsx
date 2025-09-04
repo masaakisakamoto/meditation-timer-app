@@ -31,7 +31,6 @@ export default AlermTime;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    paddingTop: 16,
     paddingBottom: 16,
     alignItems: "center",
   },
@@ -60,7 +59,7 @@ const styles = StyleSheet.create({
   },
   unit: {
     fontSize: 22,
-    fontWeight: "500",
+    marginBottom: 4,
     fontFamily: "ZenMaruGothic-Medium",
     color: "#797878",
   },

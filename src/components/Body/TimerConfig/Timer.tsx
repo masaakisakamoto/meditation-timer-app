@@ -63,9 +63,9 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 18,
     fontFamily: 'ZenMaruGothic-Medium',
-    fontWeight: '500',
     color: '#000',
-    marginBottom: 8,
+    marginTop: 8,
+    marginBottom: 0,
   },
   timesList: {
     width: '100%',
@@ -80,10 +80,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'DidactGothic-Regular',
     marginRight: 4,
+    
   },
   unitText: {
     fontSize: 16,
     fontFamily: 'ZenMaruGothic-Medium',
     fontWeight: '500',
+    marginBottom: 6,
   },
 });

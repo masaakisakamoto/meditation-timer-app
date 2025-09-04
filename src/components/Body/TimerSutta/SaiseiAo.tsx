@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
     left: '5.3%',
     color: '#000',
     fontFamily: 'ZenMaruGothic-Medium',
-    fontWeight: '500',
   },
   title: {
     top: '6.9%',

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -35,6 +36,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function MainTabs() {
   const [active, setActive] = useState<keyof RootTabParamList>('TimerStart');
 
+const [fontsLoaded] = useFonts({
+    Yomogi: require('./assets/ttf/Yomogi-Regular.ttf'),
+    ZenMaruGothic: require('./assets/ttf/ZenMaruGothic-Regular.ttf'),
+    ZenMaruGothicBold: require('./assets/ttf/ZenMaruGothic-Bold.ttf'), // 追加
+    ZenMaruGothicBlack: require('./assets/ttf/ZenMaruGothic-Black.ttf'), // 追加
+    ZenMaruGothicMedium: require('./assets/ttf/ZenMaruGothic-Medium.ttf'), // 追加
+    ZenMaruGothicRegular: require('./assets/ttf/ZenMaruGothic-Regular.ttf'), // 追加
+  });
+if (!fontsLoaded) return null;   // ★ これを追加（読み込み完了まで描画しない）
   const renderScreen = () => {
     switch (active) {
       case 'TimerStart':
@@ -57,6 +67,7 @@ function MainTabs() {
 }
 
 export default function App() {
+    
   const [entries, setEntries] = useState<{ date: string; text: string }[]>([]);
 
   useEffect(() => {

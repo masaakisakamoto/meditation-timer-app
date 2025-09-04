@@ -15,6 +15,8 @@ import { RootTabParamList } from '../../App';
 import Header from '../components/Header/Header';
 import SuttaRowDisplay from '../components/Body/TimerSutta/SuttaRowDisplay';
 
+
+
 type Props = BottomTabScreenProps<RootTabParamList, 'TimerSutta'>;
 
 type SuttaItem = {
@@ -49,7 +51,11 @@ const TimerSutta: FC<Props> = () => {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Header title="パーリ語日常読誦経典" />
+      <Header
+  title="パーリ語日常読誦経典"
+  titleStyle={{ fontFamily: 'ZenMaruGothicBold' }} // ← 追加
+  hasDivider={true} // 画面限定表示
+/>
 
       <FlatList
         data={suttas}
@@ -169,7 +175,7 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
   ) : (
     <TouchableOpacity
       onPress={onPress}
-      style={{ marginBottom: 12 }}
+      style={{ marginBottom: 10 }}
       disabled={loading}
     >
       <SuttaRowDisplay
@@ -195,14 +201,5 @@ const styles = StyleSheet.create({
   loading: {
     height: 58,
     marginBottom: 0,
-  },
-});
-
-const footerStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    height: 64,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
   },
 });

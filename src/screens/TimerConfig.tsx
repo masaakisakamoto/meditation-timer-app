@@ -123,7 +123,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
   /* -------- render -------- */
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="タイマー設定" />
+      <Header title="Timer設定" />
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* 円形タイマー＋現在の 3 つの分 */}

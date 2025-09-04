@@ -83,7 +83,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: "500",
     fontFamily: "ZenMaruGothic-Medium",
     color: "#000",
   },
