@@ -16,6 +16,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "jp.theravada.meditation",
       buildNumber: "1",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       package: "jp.theravada.meditation",
@@ -25,6 +28,11 @@ export default {
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
+    },
+    extra: {
+      eas: {
+        projectId: "20b85940-c010-4d09-aede-a29ecf259642",
+      },
     },
     web: {
       favicon: "./assets/favicon.png",

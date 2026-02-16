@@ -1,6 +1,5 @@
-// App.tsx (抜粋)
 import React, { useState, useEffect } from 'react';
-import { Alert, View, StyleSheet } from 'react-native';
+import { Alert, View, StyleSheet, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 
@@ -12,8 +11,8 @@ import { ConfigProvider } from './src/context/ConfigContext';
 
 import TimerStart from './src/screens/TimerStart';
 import TimerConfig from './src/screens/TimerConfig';
-import TimerSutta  from './src/screens/TimerSutta';
-import TimerStop   from './src/screens/TimerStop';
+import TimerSutta from './src/screens/TimerSutta';
+import TimerStop from './src/screens/TimerStop';
 import FooterNavigator from './src/components/Footer/FooterNavigator';
 
 export type RootTabParamList = {
@@ -26,7 +25,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   TimerStop: {
     courseTimes: number[];
-    mode: 'countdown' | 'countup';
+    mode: 'countdown' | 'countdown';
     ringType: string;
   };
 };
@@ -34,17 +33,9 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function MainTabs() {
-  const [active, setActive] = useState<keyof RootTabParamList>('TimerStart');
+  type ActiveScreen = 'TimerStart' | 'TimerConfig' | 'TimerSutta';
+  const [active, setActive] = useState<ActiveScreen>('TimerStart');
 
-const [fontsLoaded] = useFonts({
-    Yomogi: require('./assets/ttf/Yomogi-Regular.ttf'),
-    ZenMaruGothic: require('./assets/ttf/ZenMaruGothic-Regular.ttf'),
-    ZenMaruGothicBold: require('./assets/ttf/ZenMaruGothic-Bold.ttf'), // 追加
-    ZenMaruGothicBlack: require('./assets/ttf/ZenMaruGothic-Black.ttf'), // 追加
-    ZenMaruGothicMedium: require('./assets/ttf/ZenMaruGothic-Medium.ttf'), // 追加
-    ZenMaruGothicRegular: require('./assets/ttf/ZenMaruGothic-Regular.ttf'), // 追加
-  });
-if (!fontsLoaded) return null;   // ★ これを追加（読み込み完了まで描画しない）
   const renderScreen = () => {
     switch (active) {
       case 'TimerStart':
@@ -67,9 +58,9 @@ if (!fontsLoaded) return null;   // ★ これを追加（読み込み完了ま�
 }
 
 export default function App() {
-    
   const [entries, setEntries] = useState<{ date: string; text: string }[]>([]);
 
+  // ✅ 先に useEffect（フォント未ロードでも毎回同じHook数になる）
   useEffect(() => {
     (async () => {
       try {
@@ -84,6 +75,28 @@ export default function App() {
   useEffect(() => {
     AsyncStorage.setItem('entries', JSON.stringify(entries)).catch(() => {});
   }, [entries]);
+
+  // ✅ useFonts も Hook なので、ここも毎回同じ位置で必ず呼ぶ
+  const [fontsLoaded, fontError] = useFonts({
+    Yomogi: require('./assets/ttf/Yomogi-Regular.ttf'),
+    ZenMaruGothicRegular: require('./assets/ttf/ZenMaruGothic-Regular.ttf'),
+    ZenMaruGothicBold: require('./assets/ttf/ZenMaruGothic-Bold.ttf'),
+    ZenMaruGothicBlack: require('./assets/ttf/ZenMaruGothic-Black.ttf'),
+    ZenMaruGothicMedium: require('./assets/ttf/ZenMaruGothic-Medium.ttf'),
+    ZenMaruGothicLight: require('./assets/ttf/ZenMaruGothic-Light.ttf'),
+  });
+
+  if (fontError) {
+    console.log('FONT ERROR:', fontError);
+  }
+
+  if (!fontsLoaded) {
+    return (
+      <View style={[styles.flex, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text>Loading fonts...</Text>
+      </View>
+    );
+  }
 
   return (
     <ConfigProvider>
