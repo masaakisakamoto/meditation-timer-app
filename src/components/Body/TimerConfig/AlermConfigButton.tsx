@@ -1,13 +1,6 @@
 // src/components/Body/TimerConfig/AlarmInputRow.tsx
-import React, { FC, useState } from "react";
-import {
-  View,
-  TextInput,
-  Pressable,
-  Text,
-  StyleSheet,
-  Keyboard,
-} from "react-native";
+import React, { FC, useState } from 'react';
+import { View, TextInput, Pressable, Text, StyleSheet, Keyboard } from 'react-native';
 
 type Props = {
   /** 入力された分数を受け取るコールバック */
@@ -16,21 +9,18 @@ type Props = {
   buttonLabel?: string;
 };
 
-const AlarmInputRow: FC<Props> = ({
-  onAdd,
-  buttonLabel = "アラームを設定",
-}) => {
-  const [input, setInput] = useState<string>("");
+const AlarmInputRow: FC<Props> = ({ onAdd, buttonLabel = 'アラームを設定' }) => {
+  const [input, setInput] = useState<string>('');
 
   const handlePress = () => {
     const minutes = parseInt(input, 10);
     if (isNaN(minutes) || minutes <= 0) {
       // 必要に応じてエラー表示など
-      setInput("");
+      setInput('');
       return;
     }
     onAdd(minutes);
-    setInput("");
+    setInput('');
     Keyboard.dismiss();
   };
 
@@ -56,10 +46,10 @@ export default AlarmInputRow;
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 12,
-    width: "100%",
+    width: '100%',
     paddingHorizontal: 20,
   },
   input: {
@@ -67,8 +57,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ccc",
-	backgroundColor: "#fff",
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
     paddingHorizontal: 12,
     fontSize: 18,
     marginRight: 12,
@@ -77,13 +67,13 @@ const styles = StyleSheet.create({
     width: 140,
     height: 50,
     borderRadius: 8,
-    backgroundColor: "#fad179",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#fad179',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     fontSize: 18,
-    fontFamily: "ZenMaruGothic-Medium",
-    color: "#000",
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#000',
   },
 });

@@ -19,8 +19,8 @@ const SuttaRowDisplay: FC<SuttaProps> = ({
 }) => {
   // 再生中なら pauseIcon、それ以外は saiseiIcon
   const saiseiIcon = require('../../../../assets/SaiseiIcon.png');
-  const pauseIcon   = require('../../../../assets/PauseIcon.png');
-  const iconSource  = isPlaying ? pauseIcon : saiseiIcon;
+  const pauseIcon = require('../../../../assets/PauseIcon.png');
+  const iconSource = isPlaying ? pauseIcon : saiseiIcon;
 
   return (
     <View style={[styles.container, { backgroundColor }]}>

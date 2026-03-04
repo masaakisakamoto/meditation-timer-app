@@ -8,11 +8,7 @@ type Props = {
 
 const AlarmTime: FC<Props> = ({ times }) => {
   // always three entries
-  const display = [
-    times[0] ?? 0,
-    times[1] ?? 0,
-    times[2] ?? 0,
-  ];
+  const display = [times[0] ?? 0, times[1] ?? 0, times[2] ?? 0];
 
   return (
     <View style={styles.wrapper}>
@@ -42,8 +38,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'ZenMaruGothic-Medium',
     marginBottom: 0,
-	textAlign: 'center',  
-
+    textAlign: 'center',
   },
   container: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 // src/components/Body/TimerConfig/AlermTime.tsx
-import React, { FC } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { FC } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 type Props = {
   /** アラーム時間を分単位で３つ並べて渡す */
@@ -17,7 +17,7 @@ const AlermTime: FC<Props> = ({ times }) => {
       <View style={styles.row}>
         {times.map((t, i) => (
           <View key={i} style={styles.item}>
-            <Text style={styles.value}>{String(t).padStart(2, "0")}</Text>
+            <Text style={styles.value}>{String(t).padStart(2, '0')}</Text>
             <Text style={styles.unit}>分</Text>
           </View>
         ))}
@@ -30,37 +30,37 @@ export default AlermTime;
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     paddingBottom: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   background: {
-    width: "80%",
+    width: '80%',
     height: 52,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 15,
-    position: "absolute",
+    position: 'absolute',
   },
   row: {
-    flexDirection: "row",
-    justifyContent: "space-around",  // ← space-between → space-around
-    width: "80%",
+    flexDirection: 'row',
+    justifyContent: 'space-around', // ← space-between → space-around
+    width: '80%',
   },
   item: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginHorizontal: 8,              // ← アイテム間に余白
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginHorizontal: 8, // ← アイテム間に余白
   },
   value: {
     fontSize: 32,
-    fontWeight: "500",
-    fontFamily: "ZenMaruGothic-Medium",
+    fontWeight: '500',
+    fontFamily: 'ZenMaruGothic-Medium',
     marginRight: 4,
   },
   unit: {
     fontSize: 22,
     marginBottom: 4,
-    fontFamily: "ZenMaruGothic-Medium",
-    color: "#797878",
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#797878',
   },
 });

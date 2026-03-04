@@ -1,22 +1,18 @@
 // src/components/Header/Header.tsx
 import React, { FC } from 'react';
-import { SafeAreaView, Text, StyleSheet, TextStyle,View } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, TextStyle, View } from 'react-native';
 
 interface HeaderProps {
   title: string;
   // 任意：親から上書きしたい場合に使える
   titleStyle?: TextStyle;
-  hasDivider?: boolean;  // 追加
+  hasDivider?: boolean; // 追加
 }
 
 const Header: FC<HeaderProps> = ({ title, titleStyle, hasDivider }) => (
   <View>
     <SafeAreaView style={styles.header}>
-      <Text
-        style={[styles.title, titleStyle]}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
+      <Text style={[styles.title, titleStyle]} numberOfLines={1} ellipsizeMode="tail">
         {title}
       </Text>
     </SafeAreaView>

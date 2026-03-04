@@ -18,20 +18,14 @@ const MyCource: FC<Props> = ({ courses, onSelect, onDelete }) => (
     {courses.map((course) => (
       <View key={course.id} style={styles.courseItem}>
         {/* 選択ボタン */}
-        <Pressable
-          style={styles.selectButton}
-          onPress={() => onSelect(course.times)}
-        >
+        <Pressable style={styles.selectButton} onPress={() => onSelect(course.times)}>
           <Text style={styles.selectText}>
             {course.times.map((t) => `${t}分`).join('　')}
           </Text>
         </Pressable>
 
         {/* 削除ボタン */}
-        <Pressable
-          style={styles.deleteButton}
-          onPress={() => onDelete(course.id)}
-        >
+        <Pressable style={styles.deleteButton} onPress={() => onDelete(course.id)}>
           <Image source={deleteIcon} style={styles.deleteIcon} />
         </Pressable>
       </View>
@@ -74,13 +68,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   deleteButton: {
-	marginTop: 15,
+    marginTop: 15,
     marginLeft: 0,
-    padding: 8,            // make touch area more generous
+    padding: 8, // make touch area more generous
     borderRadius: 8,
   },
   deleteIcon: {
-    width: 100,             // match actual asset dimensions
+    width: 100, // match actual asset dimensions
     height: 100,
     resizeMode: 'contain',
   },

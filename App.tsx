@@ -25,7 +25,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   TimerStop: {
     courseTimes: number[];
-    mode: 'countdown' | 'countdown';
+    mode: 'countdown' | 'countup';
     ringType: string;
   };
 };

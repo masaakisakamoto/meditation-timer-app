@@ -1,14 +1,8 @@
 // src/components/Body/TimerConfig/TimerModeToggle.tsx
-import React, { FC } from "react";
-import {
-  SafeAreaView,
-  Pressable,
-  View,
-  Text,
-  StyleSheet,
-} from "react-native";
+import React, { FC } from 'react';
+import { SafeAreaView, Pressable, View, Text, StyleSheet } from 'react-native';
 
-export type Mode = "countdown" | "countup";
+export type Mode = 'countdown' | 'countup';
 
 type Props = {
   /** 現在のモード */
@@ -18,7 +12,7 @@ type Props = {
 };
 
 const TimerModeToggle: FC<Props> = ({ mode, onToggle }) => {
-  const isDown = mode === "countdown";
+  const isDown = mode === 'countdown';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,21 +21,11 @@ const TimerModeToggle: FC<Props> = ({ mode, onToggle }) => {
         onPress={onToggle}
       >
         <Text style={[styles.label, isDown ? styles.downText : styles.upText]}>
-          {isDown ? "カウントダウンする" : "カウントアップする"}
+          {isDown ? 'カウントダウンする' : 'カウントアップする'}
         </Text>
-        <View
-          style={[
-            styles.indicator,
-            isDown ? styles.downInd : styles.upInd,
-          ]}
-        />
-        <Text
-          style={[
-            styles.countSample,
-            isDown ? styles.downSample : styles.upSample,
-          ]}
-        >
-          {isDown ? "5,4,3…" : "1,2,3…"}
+        <View style={[styles.indicator, isDown ? styles.downInd : styles.upInd]} />
+        <Text style={[styles.countSample, isDown ? styles.downSample : styles.upSample]}>
+          {isDown ? '5,4,3…' : '1,2,3…'}
         </Text>
       </Pressable>
     </SafeAreaView>
@@ -52,68 +36,68 @@ export default TimerModeToggle;
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     height: 80,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   button: {
-    width: "90%",
+    width: '90%',
     height: 60,
     borderRadius: 15,
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 10,
   },
   // 背景色
-  downBg: { backgroundColor: "#fcdfa5" },
-  upBg: { backgroundColor: "#fcdfa5" },
+  downBg: { backgroundColor: '#fcdfa5' },
+  upBg: { backgroundColor: '#fcdfa5' },
 
   // ラベル
   label: {
     fontSize: 20,
     lineHeight: 25,
-    fontFamily: "ZenMaruGothic-Medium",
-    fontWeight: "500",
-    textAlign: "center",
-    position: "absolute",
-    left: "25%",    // 左から25%の位置に配置
-    right: "5%",    // 右端の余白5%
-    flexShrink: 1,  // テキストを縮小可能に
+    fontFamily: 'ZenMaruGothic-Medium',
+    fontWeight: '500',
+    textAlign: 'center',
+    position: 'absolute',
+    left: '25%', // 左から25%の位置に配置
+    right: '5%', // 右端の余白5%
+    flexShrink: 1, // テキストを縮小可能に
   },
-  downText: { color: "#000" },
-  upText: { color: "#000" },
+  downText: { color: '#000' },
+  upText: { color: '#000' },
 
   // サンプル数字背景
   indicator: {
-    position: "absolute",
+    position: 'absolute',
     borderRadius: 12,
-    width: "20%",
-    height: "60%",
-    left: "5%",
-    top: "20%",
+    width: '20%',
+    height: '60%',
+    left: '5%',
+    top: '20%',
   },
   downInd: {
-    backgroundColor: "#fff095",
+    backgroundColor: '#fff095',
   },
   upInd: {
-    backgroundColor: "#f9c04c",
+    backgroundColor: '#f9c04c',
   },
 
   // サンプル数字
   countSample: {
-    position: "absolute",
+    position: 'absolute',
     fontSize: 16,
-    fontFamily: "GothicA1-Medium",
-    fontWeight: "500",
-    left: "8%",
-    top: "30%",
+    fontFamily: 'GothicA1-Medium',
+    fontWeight: '500',
+    left: '8%',
+    top: '30%',
   },
   downSample: {
-    color: "#aba686",
+    color: '#aba686',
   },
   upSample: {
-    color: "#fff",
+    color: '#fff',
   },
 });

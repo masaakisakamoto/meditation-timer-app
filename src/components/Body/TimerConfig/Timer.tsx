@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    height: 200,    // 背景SVG の実際の高さに合わせる
+    height: 200, // 背景SVG の実際の高さに合わせる
   },
   content: {
     position: 'absolute',
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'DidactGothic-Regular',
     marginRight: 4,
-    
   },
   unitText: {
     fontSize: 16,

@@ -1,6 +1,12 @@
 // src/components/Footer/FooterNavigator.tsx
 import React from 'react';
-import { View, Pressable, Text, StyleSheet, StyleSheet as RNStyleSheet } from 'react-native';
+import {
+  View,
+  Pressable,
+  Text,
+  StyleSheet,
+  StyleSheet as RNStyleSheet,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PatternA from '../../../assets/FooterButtonA.svg';
 import PatternB from '../../../assets/FooterButtonB.svg';
@@ -14,9 +20,9 @@ type Props = {
 const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
   const insets = useSafeAreaInsets();
   const tabs = [
-    { name: 'TimerStart',  label: 'タイマー' },
+    { name: 'TimerStart', label: 'タイマー' },
     { name: 'TimerConfig', label: 'タイマー\n設定' },
-    { name: 'TimerSutta',  label: '経典' },
+    { name: 'TimerSutta', label: '経典' },
   ] as const;
 
   return (
@@ -32,14 +38,14 @@ const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
         },
       ]}
     >
-      {tabs.map(tab => {
+      {tabs.map((tab) => {
         const Icon = activeTab === tab.name ? PatternB : PatternA;
         const isActive = activeTab === tab.name;
 
         return (
           <Pressable
             key={tab.name}
-            style={styles.button}                 // ★ 横並び & 均等幅に戻す
+            style={styles.button} // ★ 横並び & 均等幅に戻す
             android_ripple={{ color: '#00000022', borderless: false }}
             onPress={() => onTabChange(tab.name)}
           >
@@ -55,7 +61,9 @@ const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
             />
 
             {/* ★ 前面にテキスト（重なり実現） */}
-            <Text style={[styles.label, isActive ? styles.labelActive : styles.labelInactive]}>
+            <Text
+              style={[styles.label, isActive ? styles.labelActive : styles.labelInactive]}
+            >
               {tab.label}
             </Text>
           </Pressable>
@@ -69,12 +77,12 @@ export default FooterNavigator;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',     // ★ 横並び
+    flexDirection: 'row', // ★ 横並び
     backgroundColor: '#E0EEF9',
   },
   button: {
-    flex: 1,                  // ★ 各ボタンを等分
-    position: 'relative',     // ★ 子のabsolute配置の基準にする
+    flex: 1, // ★ 各ボタンを等分
+    position: 'relative', // ★ 子のabsolute配置の基準にする
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -82,12 +90,12 @@ const styles = StyleSheet.create({
     // paddingVertical: 6, paddingHorizontal: 8,
   },
   label: {
-    position: 'absolute',     // ★ 背景SVGの上に重ねる
+    position: 'absolute', // ★ 背景SVGの上に重ねる
     marginLeft: 15,
     fontSize: 18,
     fontFamily: 'ZenMaruGothic-Medium',
     textAlign: 'center',
   },
-  labelActive:   { color: '#FEEF94' },
-  labelInactive: { color: '#000'    },
+  labelActive: { color: '#FEEF94' },
+  labelInactive: { color: '#000' },
 });

@@ -1,38 +1,43 @@
 // src/screens/TimerStop.tsx
-import React, { FC, useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
+import React, {
+  FC,
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  useCallback,
+  useRef,
+} from 'react';
 import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import type { AudioPlayer, AudioStatus } from 'expo-audio';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import Header     from '../components/Header/Header';
-import AlermTime  from '../components/Body/TimerStop/AlermTime';
-import Timer      from '../components/Body/TimerStop/Timer';
+import Header from '../components/Header/Header';
+import AlermTime from '../components/Body/TimerStop/AlermTime';
+import Timer from '../components/Body/TimerStop/Timer';
 import { RootStackParamList } from '../../App';
-import { ConfigContext }      from '../context/ConfigContext';
-import { orinList }          from './TimerConfig';
-import type { Orin }         from '../components/Body/TimerConfig/OverlayOrin';
+import { ConfigContext } from '../context/ConfigContext';
+import { orinList } from './TimerConfig';
+import type { Orin } from '../components/Body/TimerConfig/OverlayOrin';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TimerStop'>;
 
 /* -------------------------------------------------- */
 /** AudioPlayer を再生し、再生完了まで待つ */
 const playAndWait = (player: AudioPlayer) =>
-  new Promise<void>(resolve => {
+  new Promise<void>((resolve) => {
     let hasStarted = false;
-    const sub = player.addListener(
-      'playbackStatusUpdate',
-      (status: AudioStatus) => {
-        if (!hasStarted && status.playing) {
-          hasStarted = true;
-        }
-        if (hasStarted && !status.playing) {
-          sub.remove();          // 監視解除
-          resolve();             // Promise 完了
-        }
+    const sub = player.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+      if (!hasStarted && status.playing) {
+        hasStarted = true;
       }
-    );
-    player.play();               // 再生スタート
+      if (hasStarted && !status.playing) {
+        sub.remove(); // 監視解除
+        resolve(); // Promise 完了
+      }
+    });
+    player.play(); // 再生スタート
   });
 
 /** おりんを鳴らす */
@@ -56,13 +61,13 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const cumulativeSecs = useMemo(
     () =>
       courseTimes
-        .map(m => m * 60)  // 分を秒に変換
+        .map((m) => m * 60) // 分を秒に変換
         .reduce<number[]>((acc, sec, i) => {
           // 累積時間を計算 (例: [60, 120, 180])
           acc.push((i === 0 ? 0 : acc[i - 1]) + sec);
           return acc;
         }, []),
-    [courseTimes]
+    [courseTimes],
   );
   const totalSec = cumulativeSecs.at(-1) ?? 0;
 
@@ -85,15 +90,15 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   // 音声プレイヤーの設定
   const suttaPlayer = useAudioPlayer(
-    readingOn ? require('../../assets/suttas/0001tisarana.mp3') : null
+    readingOn ? require('../../assets/suttas/0001tisarana.mp3') : null,
   );
   const suttaStatus = useAudioPlayerStatus(suttaPlayer);
 
   const sangePlayer = useAudioPlayer(
-    readingOn ? require('../../assets/suttas/0002sange.mp3') : null
+    readingOn ? require('../../assets/suttas/0002sange.mp3') : null,
   );
   const sangeStatus = useAudioPlayerStatus(sangePlayer);
-  
+
   // 開始時のおりん
   const orinPlayer = useAudioPlayer(orinSound);
   const orinStatus = useAudioPlayerStatus(orinPlayer);
@@ -111,7 +116,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   // 安全に音声を停止する関数
   const safeStopAudio = useCallback(() => {
     if (!isMountedRef.current) return;
-    
+
     console.log('Attempting to stop audio players');
 
     // 経典の停止
@@ -163,7 +168,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       if (isMountedRef.current) {
         console.log('Component unmounting, cleaning up');
         isMountedRef.current = false;
-        
+
         // 直接クリーンアップを実行（safeStopAudioの依存関係を避ける）
         try {
           suttaPlayer.pause();
@@ -195,12 +200,12 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   /* ---------- 起動シーケンス ---------- */
   useEffect(() => {
     if (!isMountedRef.current) return;
-    
+
     let isActive = true;
 
     const startSequence = () => {
       if (!isMountedRef.current || !isActive) return;
-      
+
       if (readingOn && isSuttaPlayerValid) {
         try {
           suttaPlayer.play();
@@ -226,23 +231,19 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         if (isSuttaPlayerValid) {
           try {
             suttaPlayer.pause();
-          } catch (error) {
-            
-          }
+          } catch (error) {}
           setSuttaPlayerValid(false);
         }
         if (isSangePlayerValid) {
           try {
             sangePlayer.pause();
-          } catch (error) {
-          }
+          } catch (error) {}
           setSangePlayerValid(false);
         }
         if (isOrinPlayerValid) {
           try {
             orinPlayer.pause();
-          } catch (error) {
-          }
+          } catch (error) {}
           setOrinPlayerValid(false);
         }
       }
@@ -251,14 +252,21 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   // 経典の再生状態を監視
   useEffect(() => {
-    if (!readingOn || !suttaStatus || !isSuttaPlayerValid || !isSangePlayerValid || !isOrinPlayerValid || !isMountedRef.current) return;
+    if (
+      !readingOn ||
+      !suttaStatus ||
+      !isSuttaPlayerValid ||
+      !isSangePlayerValid ||
+      !isOrinPlayerValid ||
+      !isMountedRef.current
+    )
+      return;
 
     if (suttaStatus.didJustFinish) {
-      
       // 経典が完全に終わるまで少し待つ
       setTimeout(() => {
         if (!isMountedRef.current || !isSangePlayerValid) return;
-        
+
         try {
           sangePlayer.play();
         } catch (error) {
@@ -271,16 +279,22 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   // 懴悔の再生状態を監視
   useEffect(() => {
-    if (!readingOn || !sangeStatus || !isSangePlayerValid || !isOrinPlayerValid || !isMountedRef.current) return;
+    if (
+      !readingOn ||
+      !sangeStatus ||
+      !isSangePlayerValid ||
+      !isOrinPlayerValid ||
+      !isMountedRef.current
+    )
+      return;
 
     if (sangeStatus.didJustFinish) {
-      
       // 懴悔が完全に終わるまで少し待つ
       setTimeout(() => {
         if (!isMountedRef.current || !isOrinPlayerValid) return;
-        
+
         try {
-          orinPlayer.pause();  // 一度停止してから再生
+          orinPlayer.pause(); // 一度停止してから再生
           setTimeout(() => {
             if (!isMountedRef.current || !isOrinPlayerValid) return;
             try {
@@ -303,10 +317,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     if (!orinStatus || !isOrinPlayerValid || !isMountedRef.current) return;
 
     if (orinStatus.didJustFinish) {
-      
       setTimeout(() => {
         if (isMountedRef.current) {
-          
           setPlaying(true);
         }
       }, 500);
@@ -316,62 +328,64 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   /* ---------- 1 秒ごとカウント ---------- */
   useEffect(() => {
     if (!isPlaying || !isMountedRef.current) return;
-    
+
     const id = setInterval(() => {
       if (isMountedRef.current) {
-        setSec(p => (mode === 'countup' ? p + 1 : p - 1));
+        setSec((p) => (mode === 'countup' ? p + 1 : p - 1));
       }
     }, 1000);
-    
+
     return () => clearInterval(id);
   }, [isPlaying, mode]);
 
   /* ---------- タイマー区切りのおりん再生 ---------- */
-  const playTimerBell = useCallback((index: number) => {
-    if (!isMountedRef.current) return;
-    
-    try {
-      // インデックスに応じたプレイヤーを選択
-      const player = index === 0 ? firstBellPlayer :
-                    index === 1 ? secondBellPlayer :
-                                 thirdBellPlayer;
-      
-      // 一度停止してから再生（確実に再生するため）
-      player.pause();
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          try {
-            player.play();
-            
-          } catch (error) {
-            console.error(`Error playing timer bell ${index + 1}:`, error);
+  const playTimerBell = useCallback(
+    (index: number) => {
+      if (!isMountedRef.current) return;
+
+      try {
+        // インデックスに応じたプレイヤーを選択
+        const player =
+          index === 0
+            ? firstBellPlayer
+            : index === 1
+              ? secondBellPlayer
+              : thirdBellPlayer;
+
+        // 一度停止してから再生（確実に再生するため）
+        player.pause();
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            try {
+              player.play();
+            } catch (error) {
+              console.error(`Error playing timer bell ${index + 1}:`, error);
+            }
           }
-        }
-      }, 50);
-    } catch (error) {
-      console.error(`Error preparing timer bell ${index + 1}:`, error);
-    }
-  }, [firstBellPlayer, secondBellPlayer, thirdBellPlayer]);
+        }, 50);
+      } catch (error) {
+        console.error(`Error preparing timer bell ${index + 1}:`, error);
+      }
+    },
+    [firstBellPlayer, secondBellPlayer, thirdBellPlayer],
+  );
 
   /* ---------- カウント中のおりん再生判定 ---------- */
   useEffect(() => {
     if (!isPlaying || nextIdx >= cumulativeSecs.length || !isMountedRef.current) return;
     const elapsedSec = mode === 'countup' ? sec : totalSec - sec;
 
-
     // 次のおりんのタイミングに達したかチェック
     if (elapsedSec >= cumulativeSecs[nextIdx]) {
       playTimerBell(nextIdx);
-      setNextIdx(prev => {
+      setNextIdx((prev) => {
         const newIdx = prev + 1;
         return newIdx;
       });
     }
 
     // タイマー終了判定
-    if ((mode === 'countup' && sec >= totalSec) ||
-        (mode === 'countdown' && sec <= 0)) {
-
+    if ((mode === 'countup' && sec >= totalSec) || (mode === 'countdown' && sec <= 0)) {
       setPlaying(false);
     }
   }, [sec, mode, totalSec, cumulativeSecs, nextIdx, isPlaying, playTimerBell]);
@@ -388,11 +402,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           time={displayTime}
           isPlaying={isPlaying}
           onTogglePause={() => {
-            
-            setPlaying(p => !p);
+            setPlaying((p) => !p);
           }}
           onStop={() => {
-            
             // まずタイマーを停止
             setPlaying(false);
             // 音声を停止してから画面遷移
@@ -400,17 +412,14 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
             // 少し待ってから画面遷移
             setTimeout(() => {
               if (isMountedRef.current) {
-               
                 navigation.goBack();
               }
             }, 100);
           }}
         />
-        <AlermTime times={[
-          courseTimes[0] ?? 0,
-          courseTimes[1] ?? 0,
-          courseTimes[2] ?? 0,
-        ]} />
+        <AlermTime
+          times={[courseTimes[0] ?? 0, courseTimes[1] ?? 0, courseTimes[2] ?? 0]}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -418,7 +427,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
-  body:      { paddingVertical: 20, alignItems: 'center' },
+  body: { paddingVertical: 20, alignItems: 'center' },
 });
 
 export default TimerStop;

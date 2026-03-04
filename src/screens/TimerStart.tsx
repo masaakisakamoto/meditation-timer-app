@@ -1,31 +1,19 @@
 // src/screens/TimerStart.tsx
 import React, { FC, useState, useContext } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Alert,
-} from 'react-native';
-import {
-  CompositeNavigationProp,
-  useNavigation,
-} from '@react-navigation/native';
-import type {
-  BottomTabNavigationProp,
-} from '@react-navigation/bottom-tabs';
-import type {
-  NativeStackNavigationProp,
-} from '@react-navigation/native-stack';
+import { SafeAreaView, ScrollView, StyleSheet, Alert } from 'react-native';
+import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootTabParamList, RootStackParamList } from '../../App';
 
-import Header     from '../components/Header/Header';
-import AlarmTime  from '../components/Body/TimerStart/AlarmTime';
-import MyCource   from '../components/Body/TimerStart/MyCource';
-import Timer      from '../components/Body/TimerStart/Timer';
+import Header from '../components/Header/Header';
+import AlarmTime from '../components/Body/TimerStart/AlarmTime';
+import MyCource from '../components/Body/TimerStart/MyCource';
+import Timer from '../components/Body/TimerStart/Timer';
 
-import { CourseContext }  from '../context/CourseContext';
-import { ConfigContext }  from '../context/ConfigContext';
+import { CourseContext } from '../context/CourseContext';
+import { ConfigContext } from '../context/ConfigContext';
 
 /* --- 型 --- */
 type Nav = CompositeNavigationProp<
@@ -39,9 +27,9 @@ export const TimerStart: FC = () => {
   /*─── グローバル state 取得 ───*/
   const { courses, deleteCourse } = useContext(CourseContext)!;
 
-  const configCtx          = useContext(ConfigContext)!;
+  const configCtx = useContext(ConfigContext)!;
   const { config, toggleReading } = configCtx;
-  const { mode, ringType, readingOn } = config;     // ← readingOn を直接参照
+  const { mode, ringType, readingOn } = config; // ← readingOn を直接参照
 
   /*─── ローカル state ───*/
   const [courseTimes, setCourseTimes] = useState<number[]>([]);
@@ -51,7 +39,7 @@ export const TimerStart: FC = () => {
 
   const handleDeleteCourse = (id: string) => {
     deleteCourse(id);
-    if (courseTimes.length && courses.find(c => c.id === id)?.times === courseTimes) {
+    if (courseTimes.length && courses.find((c) => c.id === id)?.times === courseTimes) {
       setCourseTimes([]);
     }
   };
@@ -75,8 +63,8 @@ export const TimerStart: FC = () => {
           time="00:00:00"
           running={false}
           onToggle={handleNavigateToStop}
-          isReading={readingOn}          // ← グローバルから
-          toggleReading={toggleReading}  // ← グローバル setter
+          isReading={readingOn} // ← グローバルから
+          toggleReading={toggleReading} // ← グローバル setter
         />
 
         {/* ② アラーム時間 */}

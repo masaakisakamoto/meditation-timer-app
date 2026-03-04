@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 
 // SVG は require() で読み込み、<Image> で描画します
 const ellipseIcon = require('../../../assets/Ellipse1.svg');
-const vectorIcon  = require('../../../assets/Vector.svg');
+const vectorIcon = require('../../../assets/Vector.svg');
 
 type Props = {
   onPress?: () => void;

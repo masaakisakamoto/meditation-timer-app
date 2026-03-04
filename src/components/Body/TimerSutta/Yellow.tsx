@@ -9,9 +9,7 @@ const PauseButton: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.background} />
       <Image source={pauseIcon} style={styles.icon} />
-      <Text style={[styles.subtitle, styles.textTypo]}>
-        (Dhammapada Nos. 183-185)
-      </Text>
+      <Text style={[styles.subtitle, styles.textTypo]}>(Dhammapada Nos. 183-185)</Text>
       <Text style={[styles.title, styles.textTypo]}>諸仏の教え</Text>
     </View>
   );
@@ -34,8 +32,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '34.5%',
     right: '7.3%',
-    width: 20,      // 実際のアイコン幅に合わせて調整
-    height: 20,     // 実際のアイコン高さに合わせて調整
+    width: 20, // 実際のアイコン幅に合わせて調整
+    height: 20, // 実際のアイコン高さに合わせて調整
     resizeMode: 'contain',
   },
   textTypo: {
