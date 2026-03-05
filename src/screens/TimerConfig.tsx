@@ -1,6 +1,14 @@
 // src/screens/TimerConfig.tsx
 import React, { FC, useContext, useState, useMemo } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Modal } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  View,
+  Text,
+  Switch,
+} from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { useAudioPlayer } from 'expo-audio';
@@ -174,6 +182,15 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
           }
         />
 
+        {/* 画面スリープ防止 */}
+        <View style={styles.keepAwakeRow}>
+          <Text style={styles.keepAwakeLabel}>タイマー中は画面をスリープさせない</Text>
+          <Switch
+            value={configCtx.config.keepAwakeOn}
+            onValueChange={configCtx.toggleKeepAwake}
+          />
+        </View>
+
         {/* おりん選択 */}
         <OrinButton selected={selectedOrin} onPress={() => setShowOverlay(true)} />
 
@@ -209,4 +226,22 @@ export default TimerConfig;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { padding: 20, alignItems: 'center' },
+  keepAwakeRow: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fcdfa5',
+    borderRadius: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  keepAwakeLabel: {
+    fontFamily: 'ZenMaruGothicMedium',
+    fontSize: 15,
+    color: '#000',
+    flexShrink: 1,
+    marginRight: 12,
+  },
 });

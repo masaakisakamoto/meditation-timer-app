@@ -9,6 +9,7 @@ import React, {
   useRef,
 } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, AppState } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import type { AudioPlayer, AudioStatus } from 'expo-audio';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -52,7 +53,7 @@ const playBell = async (player: AudioPlayer) => {
 export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const { courseTimes } = route.params;
   const { config } = useContext(ConfigContext)!;
-  const { mode, ringType, readingOn } = config;
+  const { mode, ringType, readingOn, keepAwakeOn } = config;
 
   // コンポーネントのマウント状態を追跡
   const isMountedRef = useRef(true);
@@ -124,6 +125,18 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       setNextIdx(0);
     }
   }, [isPlaying]);
+
+  /* ---------- 画面スリープ防止 ---------- */
+  useEffect(() => {
+    if (isPlaying && keepAwakeOn) {
+      activateKeepAwakeAsync();
+    } else {
+      deactivateKeepAwake();
+    }
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, [isPlaying, keepAwakeOn]);
 
   /* ---------- サウンド ---------- */
   // 選択されたおりんの音声ファイルを取得

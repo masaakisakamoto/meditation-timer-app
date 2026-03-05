@@ -9,6 +9,7 @@ export type Config = {
   mode: Mode; // カウント方向
   ringType: string; // おりん ID
   readingOn: boolean; // 経典読み上げ ON / OFF
+  keepAwakeOn: boolean; // タイマー中に画面をスリープさせない
 };
 
 type ConfigContextType = {
@@ -16,6 +17,7 @@ type ConfigContextType = {
   setMode: (m: Mode) => void;
   setRingType: (r: string) => void;
   toggleReading: () => void;
+  toggleKeepAwake: () => void;
 };
 
 export const ConfigContext = createContext<ConfigContextType | null>(null);
@@ -29,13 +31,27 @@ export const ConfigProvider: FC<{ children: ReactNode }> = ({ children }) => {
     mode: 'countdown',
     ringType: '1', // デフォルトおりん ID
     readingOn: false,
+    keepAwakeOn: false,
   });
 
   /* ───────── 起動時に復元 ───────── */
   useEffect(() => {
     (async () => {
-      const json = await AsyncStorage.getItem(STORAGE_KEY);
-      if (json) setConfig(JSON.parse(json));
+      try {
+        const json = await AsyncStorage.getItem(STORAGE_KEY);
+        if (json) {
+          const parsed: Partial<Config> = JSON.parse(json);
+          setConfig((prev) => ({
+            ...prev,
+            mode: parsed.mode ?? prev.mode,
+            ringType: parsed.ringType ?? prev.ringType,
+            readingOn: parsed.readingOn ?? prev.readingOn,
+            keepAwakeOn: parsed.keepAwakeOn ?? prev.keepAwakeOn,
+          }));
+        }
+      } catch (e) {
+        console.error('Failed to restore config:', e);
+      }
     })();
   }, []);
 
@@ -47,30 +63,20 @@ export const ConfigProvider: FC<{ children: ReactNode }> = ({ children }) => {
   /* ───────── Setter 群 ───────── */
   const setMode = (mode: Mode) => setConfig((prev) => ({ ...prev, mode }));
 
-  const setRingType = async (ringType: string) => {
-    // 設定を更新
-    setConfig((prev) => {
-      const newConfig = { ...prev, ringType };
-      console.log('Updating config:', newConfig);
-      return newConfig;
-    });
-
-    // AsyncStorageに保存
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...config, ringType }));
-      console.log('Config saved to AsyncStorage');
-    } catch (error) {
-      console.error('Error saving config:', error);
-    }
-  };
+  const setRingType = (ringType: string) => setConfig((prev) => ({ ...prev, ringType }));
 
   /* ON/OFF をトグルするだけで良いので bool flip に */
   const toggleReading = () =>
     setConfig((prev) => ({ ...prev, readingOn: !prev.readingOn }));
 
+  const toggleKeepAwake = () =>
+    setConfig((prev) => ({ ...prev, keepAwakeOn: !prev.keepAwakeOn }));
+
   /* ───────── Provider ───────── */
   return (
-    <ConfigContext.Provider value={{ config, setMode, setRingType, toggleReading }}>
+    <ConfigContext.Provider
+      value={{ config, setMode, setRingType, toggleReading, toggleKeepAwake }}
+    >
       {children}
     </ConfigContext.Provider>
   );
