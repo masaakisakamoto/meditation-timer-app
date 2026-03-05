@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, AppState } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import type { AudioPlayer, AudioStatus } from 'expo-audio';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -57,6 +57,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   // コンポーネントのマウント状態を追跡
   const isMountedRef = useRef(true);
 
+  // ✅ タイマー開始時刻（ms）を保持（JSが止まっても復元するための基準）
+  const startAtMsRef = useRef<number | null>(null);
+
   /* ---------- 時間計算 ---------- */
   const cumulativeSecs = useMemo(
     () =>
@@ -71,10 +74,49 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   );
   const totalSec = cumulativeSecs.at(-1) ?? 0;
 
+  const clampSec = useCallback(
+    (value: number) => {
+      if (mode === 'countup') return Math.max(0, value);
+      return Math.max(0, Math.min(totalSec, value));
+    },
+    [mode, totalSec],
+  );
+
+  const computeSecFromNow = useCallback(() => {
+    const startAt = startAtMsRef.current;
+    if (startAt == null) return null;
+
+    const elapsedSec = Math.floor((Date.now() - startAt) / 1000);
+
+    if (mode === 'countup') {
+      return clampSec(elapsedSec);
+    }
+
+    // countdown
+    return clampSec(totalSec - elapsedSec);
+  }, [clampSec, mode, totalSec]);
+
   /* ---------- カウント状態 ---------- */
   const [sec, setSec] = useState(mode === 'countup' ? 0 : totalSec);
   const [isPlaying, setPlaying] = useState(false);
   const [nextIdx, setNextIdx] = useState(0);
+
+  // ✅ 再生開始した瞬間に「開始時刻」を確定
+  useEffect(() => {
+    if (!isPlaying) return;
+    if (startAtMsRef.current != null) return;
+
+    // もしsecが途中状態なら、そこから逆算して開始時刻を作る（復帰に強い）
+    const alreadyElapsed = mode === 'countup' ? sec : Math.max(0, totalSec - sec);
+
+    startAtMsRef.current = Date.now() - alreadyElapsed * 1000;
+  }, [isPlaying, mode, sec, totalSec]);
+
+  // ✅ 停止したら開始時刻をリセット（次回スタート時のズレ防止）
+  useEffect(() => {
+    if (isPlaying) return;
+    startAtMsRef.current = null;
+  }, [isPlaying]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -325,18 +367,40 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     }
   }, [orinStatus, isOrinPlayerValid]);
 
-  /* ---------- 1 秒ごとカウント ---------- */
   useEffect(() => {
     if (!isPlaying || !isMountedRef.current) return;
 
     const id = setInterval(() => {
-      if (isMountedRef.current) {
-        setSec((p) => (mode === 'countup' ? p + 1 : p - 1));
-      }
+      if (!isMountedRef.current) return;
+
+      const next = computeSecFromNow();
+      if (next == null) return;
+
+      setSec(next);
     }, 1000);
 
     return () => clearInterval(id);
-  }, [isPlaying, mode]);
+  }, [isPlaying, computeSecFromNow]);
+
+  // ✅ スリープ/バックグラウンド復帰で即座にsecを再計算
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') return;
+      if (!isMountedRef.current) return;
+
+      const next = computeSecFromNow();
+      if (next == null) return;
+
+      setSec(next);
+
+      // ✅ 途中で時間が飛んだ時、次のおりん位置もズレないように合わせる（鳴らし漏れ防止）
+      const elapsedSec = mode === 'countup' ? next : Math.max(0, totalSec - next);
+      const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
+      setNextIdx(nextIndex === -1 ? cumulativeSecs.length : nextIndex);
+    });
+
+    return () => sub.remove();
+  }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
 
   /* ---------- タイマー区切りのおりん再生 ---------- */
   const playTimerBell = useCallback(
