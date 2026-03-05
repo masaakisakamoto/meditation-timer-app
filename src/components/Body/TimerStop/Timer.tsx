@@ -59,6 +59,9 @@ const styles = StyleSheet.create({
   },
   timeText: {
     position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
     fontSize: 60,
     fontFamily: 'DidactGothic-Regular',
     color: '#000',

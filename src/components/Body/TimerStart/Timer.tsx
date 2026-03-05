@@ -126,7 +126,9 @@ const styles = StyleSheet.create({
   timeText: {
     position: 'absolute',
     top: 100,
-    left: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
     fontFamily: 'DidactGothic-Regular',
     fontSize: 60,
     color: '#000',
