@@ -63,8 +63,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const startAtMsRef = useRef<number | null>(null);
 
   // 終了通知管理
-  const notificationIdRef = useRef<string | null>(null); // スケジュール済み通知ID
-  const endsAtRef = useRef<number | null>(null); // タイマー終了の絶対時刻(ms)
+  const notificationIdsRef = useRef<string[]>([]); // スケジュール済み通知IDの配列
+  const endsAtRef = useRef<number | null>(null); // 最終区切りの絶対時刻(ms)・AppState復帰判定用
   const isPlayingRef = useRef(false); // AppStateハンドラ内でのstale防止
 
   /* ---------- 時間計算 ---------- */
@@ -137,15 +137,17 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  /* ---------- 終了通知スケジュール管理 ---------- */
+  /* ---------- 区切り・終了通知スケジュール管理 ---------- */
   useEffect(() => {
     if (!isPlaying) {
-      // 停止・一時停止: 通知キャンセル＆endsAtクリア
+      // 停止・一時停止: 全通知キャンセル＆endsAtクリア
       endsAtRef.current = null;
-      const id = notificationIdRef.current;
-      if (id) {
-        Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
-        notificationIdRef.current = null;
+      const ids = notificationIdsRef.current;
+      if (ids.length > 0) {
+        ids.forEach((id) =>
+          Notifications.cancelScheduledNotificationAsync(id).catch(() => {}),
+        );
+        notificationIdsRef.current = [];
       }
       return;
     }
@@ -154,55 +156,68 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     const startAt = startAtMsRef.current;
     if (startAt == null) return;
 
-    const endsAt = startAt + totalSec * 1000;
-    endsAtRef.current = endsAt;
-
-    if (endsAt <= Date.now()) return; // 既に終了時刻を過ぎていれば不要
+    // 最終区切りの絶対時刻をAppState復帰判定用に保存
+    endsAtRef.current = startAt + totalSec * 1000;
 
     // 既存の通知があれば先にキャンセル（重複防止）
-    const prevId = notificationIdRef.current;
-    if (prevId) {
-      Notifications.cancelScheduledNotificationAsync(prevId).catch(() => {});
-      notificationIdRef.current = null;
+    const prevIds = notificationIdsRef.current;
+    if (prevIds.length > 0) {
+      prevIds.forEach((id) =>
+        Notifications.cancelScheduledNotificationAsync(id).catch(() => {}),
+      );
+      notificationIdsRef.current = [];
     }
 
-    let scheduledId: string | null = null;
+    const now = Date.now();
+    const total = cumulativeSecs.length;
+
+    // このeffectで作成したID群（cleanup用のローカル配列）
+    const scheduledIds: string[] = [];
     let cancelled = false;
 
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: '瞑想タイマー終了',
-        body: '瞑想が完了しました',
-        sound: true,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: new Date(endsAt),
-      },
-    })
-      .then((id) => {
+    // cumulativeSecs の各区切りに通知をスケジュール
+    const promises = cumulativeSecs.map((segSec, idx) => {
+      const triggerAt = startAt + segSec * 1000;
+      if (triggerAt <= now) return Promise.resolve(); // 過去はスキップ
+
+      const isFinal = idx === total - 1;
+      return Notifications.scheduleNotificationAsync({
+        content: {
+          title: isFinal ? '瞑想タイマー終了' : '区切り終了',
+          body: isFinal ? '瞑想が完了しました' : `${idx + 1}/${total} セット完了`,
+          sound: true,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: new Date(triggerAt),
+        },
+      }).then((id) => {
         if (!cancelled) {
-          scheduledId = id;
-          notificationIdRef.current = id;
+          scheduledIds.push(id);
+          notificationIdsRef.current.push(id);
         } else {
           // cleanup 後に resolve した場合: ref には書かず即キャンセル
           Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
         }
-      })
-      .catch((e) => console.error('通知スケジュール失敗:', e));
+      });
+    });
+
+    Promise.all(promises).catch((e) => console.error('通知スケジュール失敗:', e));
 
     return () => {
       cancelled = true;
-      if (scheduledId) {
-        Notifications.cancelScheduledNotificationAsync(scheduledId).catch(() => {});
-        // 新しい schedule サイクルで ref が更新済みの場合は消さない
-        if (notificationIdRef.current === scheduledId) {
-          notificationIdRef.current = null;
-        }
+      if (scheduledIds.length > 0) {
+        scheduledIds.forEach((id) =>
+          Notifications.cancelScheduledNotificationAsync(id).catch(() => {}),
+        );
+        // refからはこのeffectで作ったIDだけを除去（新サイクル分は残す）
+        notificationIdsRef.current = notificationIdsRef.current.filter(
+          (id) => !scheduledIds.includes(id),
+        );
       }
-      // then() 未解決の場合: cancelled=true により then() 側でキャンセル
+      // then()未解決分は cancelled=true で then()側がキャンセル
     };
-  }, [isPlaying, totalSec]);
+  }, [isPlaying, totalSec, cumulativeSecs]);
 
   /* ---------- 画面スリープ防止 ---------- */
   useEffect(() => {
@@ -327,11 +342,13 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           }
         }
 
-        // スケジュール済み通知をキャンセル
-        const notifId = notificationIdRef.current;
-        if (notifId) {
-          Notifications.cancelScheduledNotificationAsync(notifId).catch(() => {});
-          notificationIdRef.current = null;
+        // スケジュール済み通知を全てキャンセル
+        const notifIds = notificationIdsRef.current;
+        if (notifIds.length > 0) {
+          notifIds.forEach((id) =>
+            Notifications.cancelScheduledNotificationAsync(id).catch(() => {}),
+          );
+          notificationIdsRef.current = [];
         }
       }
     };
