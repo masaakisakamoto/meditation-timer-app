@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, AppState } from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import * as Notifications from 'expo-notifications';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import type { AudioPlayer, AudioStatus } from 'expo-audio';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -60,6 +61,11 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   // ✅ タイマー開始時刻（ms）を保持（JSが止まっても復元するための基準）
   const startAtMsRef = useRef<number | null>(null);
+
+  // 終了通知管理
+  const notificationIdRef = useRef<string | null>(null); // スケジュール済み通知ID
+  const endsAtRef = useRef<number | null>(null); // タイマー終了の絶対時刻(ms)
+  const isPlayingRef = useRef(false); // AppStateハンドラ内でのstale防止
 
   /* ---------- 時間計算 ---------- */
   const cumulativeSecs = useMemo(
@@ -125,6 +131,78 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       setNextIdx(0);
     }
   }, [isPlaying]);
+
+  // isPlayingRef を最新値に同期（AppStateハンドラのクロージャ対策）
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  /* ---------- 終了通知スケジュール管理 ---------- */
+  useEffect(() => {
+    if (!isPlaying) {
+      // 停止・一時停止: 通知キャンセル＆endsAtクリア
+      endsAtRef.current = null;
+      const id = notificationIdRef.current;
+      if (id) {
+        Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+        notificationIdRef.current = null;
+      }
+      return;
+    }
+
+    // 再生開始: startAtMsRef は直前の useEffect で確定済み
+    const startAt = startAtMsRef.current;
+    if (startAt == null) return;
+
+    const endsAt = startAt + totalSec * 1000;
+    endsAtRef.current = endsAt;
+
+    if (endsAt <= Date.now()) return; // 既に終了時刻を過ぎていれば不要
+
+    // 既存の通知があれば先にキャンセル（重複防止）
+    const prevId = notificationIdRef.current;
+    if (prevId) {
+      Notifications.cancelScheduledNotificationAsync(prevId).catch(() => {});
+      notificationIdRef.current = null;
+    }
+
+    let scheduledId: string | null = null;
+    let cancelled = false;
+
+    Notifications.scheduleNotificationAsync({
+      content: {
+        title: '瞑想タイマー終了',
+        body: '瞑想が完了しました',
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: new Date(endsAt),
+      },
+    })
+      .then((id) => {
+        if (!cancelled) {
+          scheduledId = id;
+          notificationIdRef.current = id;
+        } else {
+          // cleanup 後に resolve した場合: ref には書かず即キャンセル
+          Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+        }
+      })
+      .catch((e) => console.error('通知スケジュール失敗:', e));
+
+    return () => {
+      cancelled = true;
+      if (scheduledId) {
+        Notifications.cancelScheduledNotificationAsync(scheduledId).catch(() => {});
+        // 新しい schedule サイクルで ref が更新済みの場合は消さない
+        if (notificationIdRef.current === scheduledId) {
+          notificationIdRef.current = null;
+        }
+      }
+      // then() 未解決の場合: cancelled=true により then() 側でキャンセル
+    };
+  }, [isPlaying, totalSec]);
 
   /* ---------- 画面スリープ防止 ---------- */
   useEffect(() => {
@@ -247,6 +325,13 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           } catch (error) {
             console.log('Timer bell player already released during unmount');
           }
+        }
+
+        // スケジュール済み通知をキャンセル
+        const notifId = notificationIdRef.current;
+        if (notifId) {
+          Notifications.cancelScheduledNotificationAsync(notifId).catch(() => {});
+          notificationIdRef.current = null;
         }
       }
     };
@@ -400,6 +485,19 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       if (!isMountedRef.current) return;
+
+      // バックグラウンドでタイマーが終了していた場合: 鐘を鳴らさず finished 状態にするだけ
+      // （通知がシステムで既に鳴動済みのため二重鳴動を防ぐ）
+      if (
+        isPlayingRef.current &&
+        endsAtRef.current !== null &&
+        Date.now() >= endsAtRef.current
+      ) {
+        setSec(mode === 'countdown' ? 0 : totalSec);
+        setNextIdx(cumulativeSecs.length);
+        setPlaying(false);
+        return;
+      }
 
       const next = computeSecFromNow();
       if (next == null) return;

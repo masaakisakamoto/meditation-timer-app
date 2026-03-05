@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Alert, View, StyleSheet, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
+
+// フォアグラウンド中は通知を表示しない（音・バナーとも無効）
+// バックグラウンド終了時のシステム通知のみ鳴動させる
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: false,
+    shouldShowBanner: false,
+    shouldShowList: false,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -59,6 +72,11 @@ function MainTabs() {
 
 export default function App() {
   const [entries, setEntries] = useState<{ date: string; text: string }[]>([]);
+
+  // 通知権限リクエスト（初回起動時）
+  useEffect(() => {
+    Notifications.requestPermissionsAsync().catch(() => {});
+  }, []);
 
   // ✅ 先に useEffect（フォント未ロードでも毎回同じHook数になる）
   useEffect(() => {
