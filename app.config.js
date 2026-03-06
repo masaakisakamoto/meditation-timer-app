@@ -1,6 +1,16 @@
+const isDevClient = process.env.APP_VARIANT === 'development';
+
+const appName = isDevClient ? 'mittertimer Dev' : 'mittertimer';
+const iosBundleId = isDevClient
+  ? 'jp.theravada.meditation.dev'
+  : 'jp.theravada.meditation';
+const androidPackage = isDevClient
+  ? 'jp.theravada.meditation.dev'
+  : 'jp.theravada.meditation';
+
 export default {
   expo: {
-    name: 'mittertimer',
+    name: appName,
     slug: 'mittertimer',
     version: '1.0.0',
     orientation: 'portrait',
@@ -14,14 +24,14 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'jp.theravada.meditation',
+      bundleIdentifier: iosBundleId,
       buildNumber: '1',
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
-      package: 'jp.theravada.meditation',
+      package: androidPackage,
       versionCode: 1,
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
