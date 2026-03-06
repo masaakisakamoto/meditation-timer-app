@@ -1,5 +1,6 @@
 // src/screens/TimerSutta.tsx
 import React, { FC, useState, useEffect } from 'react';
+
 import {
   SafeAreaView,
   FlatList,
@@ -8,7 +9,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { Asset } from 'expo-asset';
 
 import Header from '../components/Header/Header';
 import SuttaRowDisplay from '../components/Body/TimerSutta/SuttaRowDisplay';
@@ -121,6 +123,23 @@ const TimerSutta: FC = () => {
   // プレーヤーの再作成を制御するカウンター
   const [playerKey, setPlayerKey] = useState(0);
 
+  // 再生中かどうかに応じて audio mode を切り替え（子コンポーネントで分散させない）
+  useEffect(() => {
+    if (currentPlayingId !== null) {
+      setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: 'doNotMix',
+      }).catch(() => {});
+    } else {
+      setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
+        interruptionMode: 'mixWithOthers',
+      }).catch(() => {});
+    }
+  }, [currentPlayingId]);
+
   return (
     <SafeAreaView style={styles.safe}>
       <Header
@@ -190,6 +209,7 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
   // 再生終了時の処理
   useEffect(() => {
     if (status.isLoaded && status.didJustFinish) {
+      player.setActiveForLockScreen(false);
       onPlayStateChange(false);
       setIsPaused(false);
     }
@@ -199,6 +219,7 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
   useEffect(() => {
     if (stopIfOtherPlaying && isPlaying) {
       player.pause();
+      player.setActiveForLockScreen(false);
       onPlayStateChange(false);
       setIsPaused(true);
     }
@@ -215,10 +236,16 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
     if (isPlaying) {
       // 同じ経典をタップ: 一時停止
       player.pause();
+      player.setActiveForLockScreen(false);
       onPlayStateChange(false);
       setIsPaused(true);
     } else {
-      // 再生開始
+      player.setActiveForLockScreen(true, {
+        title: item.title,
+        artist: 'MitterTimer',
+        albumTitle: 'Pali Chanting',
+        artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
+      });
       if (!isPaused || shouldRestartFromBeginning) {
         // 新規再生または別の経典から戻ってきた場合は最初から
         player.pause();

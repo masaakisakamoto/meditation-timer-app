@@ -28,6 +28,7 @@ export default {
       buildNumber: '1',
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        UIBackgroundModes: ['audio'],
       },
     },
     android: {
