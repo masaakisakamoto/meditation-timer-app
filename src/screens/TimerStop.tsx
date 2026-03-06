@@ -428,6 +428,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     }, 1000);
     return () => clearTimeout(tid);
   }, [
+    readingOn,
     suttaStatus?.didJustFinish,
     isSuttaPlayerValid,
     isSangePlayerValid,
@@ -446,12 +447,13 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       return;
 
     // 懴悔が完全に終わるまで少し待つ
+    let innerTid: ReturnType<typeof setTimeout> | null = null;
     const tid = setTimeout(() => {
       if (!isMountedRef.current || !isOrinPlayerValid) return;
 
       try {
         orinPlayer.pause(); // 一度停止してから再生
-        setTimeout(() => {
+        innerTid = setTimeout(() => {
           if (!isMountedRef.current || !isOrinPlayerValid) return;
           try {
             orinPlayer.play();
@@ -465,8 +467,11 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         setOrinPlayerValid(false);
       }
     }, 1000);
-    return () => clearTimeout(tid);
-  }, [sangeStatus?.didJustFinish, isSangePlayerValid, isOrinPlayerValid]);
+    return () => {
+      clearTimeout(tid);
+      if (innerTid !== null) clearTimeout(innerTid);
+    };
+  }, [readingOn, sangeStatus?.didJustFinish, isSangePlayerValid, isOrinPlayerValid]);
 
   // おりんの再生状態を監視
   useEffect(() => {
