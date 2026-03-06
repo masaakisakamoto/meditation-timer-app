@@ -407,7 +407,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     if (
       !readingOn ||
-      !suttaStatus ||
+      !suttaStatus?.didJustFinish ||
       !isSuttaPlayerValid ||
       !isSangePlayerValid ||
       !isOrinPlayerValid ||
@@ -415,69 +415,71 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     )
       return;
 
-    if (suttaStatus.didJustFinish) {
-      // 経典が完全に終わるまで少し待つ
-      setTimeout(() => {
-        if (!isMountedRef.current || !isSangePlayerValid) return;
+    // 経典が完全に終わるまで少し待つ
+    const tid = setTimeout(() => {
+      if (!isMountedRef.current || !isSangePlayerValid) return;
 
-        try {
-          sangePlayer.play();
-        } catch (error) {
-          console.error('Error playing sange:', error);
-          setSangePlayerValid(false);
-        }
-      }, 1000);
-    }
-  }, [suttaStatus, isSuttaPlayerValid, isSangePlayerValid, isOrinPlayerValid]);
+      try {
+        sangePlayer.play();
+      } catch (error) {
+        console.error('Error playing sange:', error);
+        setSangePlayerValid(false);
+      }
+    }, 1000);
+    return () => clearTimeout(tid);
+  }, [
+    suttaStatus?.didJustFinish,
+    isSuttaPlayerValid,
+    isSangePlayerValid,
+    isOrinPlayerValid,
+  ]);
 
   // 懴悔の再生状態を監視
   useEffect(() => {
     if (
       !readingOn ||
-      !sangeStatus ||
+      !sangeStatus?.didJustFinish ||
       !isSangePlayerValid ||
       !isOrinPlayerValid ||
       !isMountedRef.current
     )
       return;
 
-    if (sangeStatus.didJustFinish) {
-      // 懴悔が完全に終わるまで少し待つ
-      setTimeout(() => {
-        if (!isMountedRef.current || !isOrinPlayerValid) return;
+    // 懴悔が完全に終わるまで少し待つ
+    const tid = setTimeout(() => {
+      if (!isMountedRef.current || !isOrinPlayerValid) return;
 
-        try {
-          orinPlayer.pause(); // 一度停止してから再生
-          setTimeout(() => {
-            if (!isMountedRef.current || !isOrinPlayerValid) return;
-            try {
-              orinPlayer.play();
-            } catch (error) {
-              console.error('Error playing bell after sange:', error);
-              setOrinPlayerValid(false);
-            }
-          }, 100);
-        } catch (error) {
-          console.error('Error pausing bell:', error);
-          setOrinPlayerValid(false);
-        }
-      }, 1000);
-    }
-  }, [sangeStatus, isSangePlayerValid, isOrinPlayerValid]);
+      try {
+        orinPlayer.pause(); // 一度停止してから再生
+        setTimeout(() => {
+          if (!isMountedRef.current || !isOrinPlayerValid) return;
+          try {
+            orinPlayer.play();
+          } catch (error) {
+            console.error('Error playing bell after sange:', error);
+            setOrinPlayerValid(false);
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Error pausing bell:', error);
+        setOrinPlayerValid(false);
+      }
+    }, 1000);
+    return () => clearTimeout(tid);
+  }, [sangeStatus?.didJustFinish, isSangePlayerValid, isOrinPlayerValid]);
 
   // おりんの再生状態を監視
   useEffect(() => {
-    if (!orinStatus || !isOrinPlayerValid || !isMountedRef.current) return;
+    if (!orinStatus?.didJustFinish || !isOrinPlayerValid || !isMountedRef.current) return;
 
-    if (orinStatus.didJustFinish) {
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          setIsPreparingSequence(false);
-          setPlaying(true);
-        }
-      }, 500);
-    }
-  }, [orinStatus, isOrinPlayerValid]);
+    const tid = setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsPreparingSequence(false);
+        setPlaying(true);
+      }
+    }, 500);
+    return () => clearTimeout(tid);
+  }, [orinStatus?.didJustFinish, isOrinPlayerValid]);
 
   useEffect(() => {
     if (!isPlaying || !isMountedRef.current) return;

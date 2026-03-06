@@ -133,7 +133,7 @@ const TimerSutta: FC = () => {
     if (currentId !== null && status.isLoaded && !isPaused) {
       player.play();
     }
-  }, [currentId, status.isLoaded]);
+  }, [currentId, status.isLoaded, isPaused]);
 
   // 自然終了時の処理
   useEffect(() => {
@@ -142,7 +142,7 @@ const TimerSutta: FC = () => {
       setCurrentId(null);
       setIsPaused(false);
     }
-  }, [status.didJustFinish]);
+  }, [status.isLoaded, status.didJustFinish]);
 
   // 再生中かどうかに応じて audio mode を切り替え
   useEffect(() => {
@@ -171,7 +171,7 @@ const TimerSutta: FC = () => {
         artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
       });
     }
-  }, [currentId, status.isLoaded, status.playing]);
+  }, [currentSutta, status.isLoaded, status.playing]);
 
   const handlePress = (item: SuttaItem) => {
     if (currentId === item.id) {
