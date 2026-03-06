@@ -116,16 +116,37 @@ const suttas: SuttaItem[] = [
 ];
 
 const TimerSutta: FC = () => {
-  // 現在再生中の経典のIDを管理
-  const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
-  // 最後に再生していた経典のIDを管理
-  const [lastPlayedId, setLastPlayedId] = useState<string | null>(null);
-  // プレーヤーの再作成を制御するカウンター
-  const [playerKey, setPlayerKey] = useState(0);
+  // 現在選択中の経典ID（null = 未選択）
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  // 一時停止中フラグ（source 切り替え後の自動再生を抑止するため）
+  const [isPaused, setIsPaused] = useState(false);
 
-  // 再生中かどうかに応じて audio mode を切り替え（子コンポーネントで分散させない）
+  // 親で1本だけ player を持つ。currentId が変わると source が切り替わる
+  const currentSutta = suttas.find((s) => s.id === currentId) ?? null;
+  const player = useAudioPlayer(currentSutta?.file ?? null);
+  const status = useAudioPlayerStatus(player);
+
+  // source 切り替え後、ロード完了で自動再生（一時停止中は除く）
+  // currentId も依存に含めることで、source 変更時に isLoaded が false→true を
+  // 通らないケースでも確実に再生トリガーされる
   useEffect(() => {
-    if (currentPlayingId !== null) {
+    if (currentId !== null && status.isLoaded && !isPaused) {
+      player.play();
+    }
+  }, [currentId, status.isLoaded]);
+
+  // 自然終了時の処理
+  useEffect(() => {
+    if (status.isLoaded && status.didJustFinish) {
+      player.setActiveForLockScreen(false);
+      setCurrentId(null);
+      setIsPaused(false);
+    }
+  }, [status.didJustFinish]);
+
+  // 再生中かどうかに応じて audio mode を切り替え
+  useEffect(() => {
+    if (currentId !== null) {
       setAudioModeAsync({
         playsInSilentMode: true,
         shouldPlayInBackground: true,
@@ -138,40 +159,56 @@ const TimerSutta: FC = () => {
         interruptionMode: 'mixWithOthers',
       }).catch(() => {});
     }
-  }, [currentPlayingId]);
+  }, [currentId]);
+
+  // ロック画面メタデータ: ロード済みかつ再生開始されたら設定
+  useEffect(() => {
+    if (currentSutta && status.isLoaded && status.playing) {
+      player.setActiveForLockScreen(true, {
+        title: currentSutta.title,
+        artist: 'MitterTimer',
+        albumTitle: 'Pali Chanting',
+        artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
+      });
+    }
+  }, [currentId, status.isLoaded, status.playing]);
+
+  const handlePress = (item: SuttaItem) => {
+    if (currentId === item.id) {
+      // 同じ行: 再生/一時停止トグル
+      if (status.playing) {
+        player.pause();
+        player.setActiveForLockScreen(false);
+        setIsPaused(true);
+      } else {
+        player.play();
+        setIsPaused(false);
+      }
+    } else {
+      // 別の行: source を切り替え → ロード完了後 useEffect で自動再生
+      setCurrentId(item.id);
+      setIsPaused(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
       <Header
         title="パーリ語日常読誦経典"
-        titleStyle={{ fontFamily: 'ZenMaruGothicBold' }} // ← 追加
-        hasDivider={true} // 画面限定表示
+        titleStyle={{ fontFamily: 'ZenMaruGothicBold' }}
+        hasDivider={true}
       />
-
       <FlatList
         data={suttas}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item, index }) => (
-          <AudioPlayer
-            key={`${item.id}-${playerKey}`}
+          <SuttaRow
             item={item}
             index={index}
-            isCurrentPlaying={currentPlayingId === item.id}
-            onPlayStateChange={(isPlaying) => {
-              if (isPlaying) {
-                // 別の経典を再生する場合はプレーヤーを再作成
-                if (currentPlayingId !== item.id && lastPlayedId !== item.id) {
-                  setPlayerKey((prev) => prev + 1);
-                }
-                setCurrentPlayingId(item.id);
-                setLastPlayedId(item.id);
-              } else {
-                setCurrentPlayingId(null);
-              }
-            }}
-            stopIfOtherPlaying={currentPlayingId !== null && currentPlayingId !== item.id}
-            shouldRestartFromBeginning={lastPlayedId !== item.id}
+            isPlaying={status.playing && currentId === item.id}
+            isLoading={currentId === item.id && (status.isBuffering || !status.isLoaded)}
+            onPress={() => handlePress(item)}
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -182,100 +219,26 @@ const TimerSutta: FC = () => {
 
 export default TimerSutta;
 
-//─── オーディオプレーヤーコンポーネント ───
-type AudioPlayerProps = {
+//─── 行表示コンポーネント（音声ロジックなし）───
+type SuttaRowProps = {
   item: SuttaItem;
   index: number;
-  isCurrentPlaying: boolean;
-  onPlayStateChange: (isPlaying: boolean) => void;
-  stopIfOtherPlaying: boolean;
-  shouldRestartFromBeginning: boolean;
+  isPlaying: boolean;
+  isLoading: boolean;
+  onPress: () => void;
 };
 
-const AudioPlayer: FC<AudioPlayerProps> = ({
-  item,
-  index,
-  isCurrentPlaying,
-  onPlayStateChange,
-  stopIfOtherPlaying,
-  shouldRestartFromBeginning,
-}) => {
-  const player = useAudioPlayer(item.file);
-  const status = useAudioPlayerStatus(player);
-  const isPlaying = status.playing;
-  const loading = status.isBuffering || !status.isLoaded;
-  const [isPaused, setIsPaused] = useState(false);
-
-  // 再生終了時の処理
-  useEffect(() => {
-    if (status.isLoaded && status.didJustFinish) {
-      player.setActiveForLockScreen(false);
-      onPlayStateChange(false);
-      setIsPaused(false);
-    }
-  }, [status.didJustFinish]);
-
-  // 他の経典が再生開始されたら停止
-  useEffect(() => {
-    if (stopIfOtherPlaying && isPlaying) {
-      player.pause();
-      player.setActiveForLockScreen(false);
-      onPlayStateChange(false);
-      setIsPaused(true);
-    }
-  }, [stopIfOtherPlaying]);
-
-  // 再生状態が変更されたときの処理
-  useEffect(() => {
-    if (isCurrentPlaying && !isPlaying) {
-      player.play();
-    }
-  }, [isCurrentPlaying]);
-
-  // ロック画面メタデータ: player がロード済みかつ当該経典が再生中になったら設定
-  useEffect(() => {
-    if (isCurrentPlaying && status.isLoaded) {
-      player.setActiveForLockScreen(true, {
-        title: item.title,
-        artist: 'MitterTimer',
-        albumTitle: 'Pali Chanting',
-        artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
-      });
-    }
-  }, [isCurrentPlaying, status.isLoaded]);
-
-  const onPress = () => {
-    if (isPlaying) {
-      // 同じ経典をタップ: 一時停止
-      player.pause();
-      player.setActiveForLockScreen(false);
-      onPlayStateChange(false);
-      setIsPaused(true);
-    } else {
-      if (!isPaused || shouldRestartFromBeginning) {
-        // 新規再生または別の経典から戻ってきた場合は最初から
-        player.pause();
-        player.play();
-        setIsPaused(false);
-      } else {
-        // 一時停止からの再開
-        player.play();
-      }
-      onPlayStateChange(true);
-    }
-  };
-
-  // 背景色ロジック
+const SuttaRow: FC<SuttaRowProps> = ({ item, index, isPlaying, isLoading, onPress }) => {
   let backgroundColor: string;
-  if (loading) backgroundColor = '#cccccc';
+  if (isLoading) backgroundColor = '#cccccc';
   else if (isPlaying) backgroundColor = '#fff095';
   else if (index % 2 === 0) backgroundColor = '#cfe1f9';
   else backgroundColor = '#ecf3fd';
 
-  return loading ? (
+  return isLoading ? (
     <ActivityIndicator style={{ height: 58, marginBottom: 12 }} color="#000" />
   ) : (
-    <TouchableOpacity onPress={onPress} style={{ marginBottom: 10 }} disabled={loading}>
+    <TouchableOpacity onPress={onPress} style={{ marginBottom: 10 }}>
       <SuttaRowDisplay
         title={item.title}
         subtitle={item.subtitle}
@@ -295,9 +258,5 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 0,
-  },
-  loading: {
-    height: 58,
-    marginBottom: 0,
   },
 });
