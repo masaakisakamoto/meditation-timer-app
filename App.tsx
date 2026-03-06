@@ -49,22 +49,31 @@ function MainTabs() {
   type ActiveScreen = 'TimerStart' | 'TimerConfig' | 'TimerSutta';
   const [active, setActive] = useState<ActiveScreen>('TimerStart');
 
-  const renderScreen = () => {
-    switch (active) {
-      case 'TimerStart':
-        return <TimerStart />;
-      case 'TimerConfig':
-        return <TimerConfig onFinished={() => setActive('TimerStart')} />;
-      case 'TimerSutta':
-        return <TimerSutta />;
-      default:
-        return <TimerStart />;
-    }
-  };
+  const vis = (name: ActiveScreen) =>
+    active === name ? styles.visible : styles.invisible;
 
   return (
     <View style={styles.flex}>
-      {renderScreen()}
+      <View style={styles.screenContainer}>
+        <View
+          style={[styles.screen, vis('TimerStart')]}
+          pointerEvents={active === 'TimerStart' ? 'auto' : 'none'}
+        >
+          <TimerStart />
+        </View>
+        <View
+          style={[styles.screen, vis('TimerConfig')]}
+          pointerEvents={active === 'TimerConfig' ? 'auto' : 'none'}
+        >
+          <TimerConfig onFinished={() => setActive('TimerStart')} />
+        </View>
+        <View
+          style={[styles.screen, vis('TimerSutta')]}
+          pointerEvents={active === 'TimerSutta' ? 'auto' : 'none'}
+        >
+          <TimerSutta />
+        </View>
+      </View>
       <FooterNavigator activeTab={active} onTabChange={setActive} />
     </View>
   );
@@ -132,4 +141,8 @@ export default function App() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  screenContainer: { flex: 1, position: 'relative' },
+  screen: { ...StyleSheet.absoluteFillObject },
+  visible: { opacity: 1 },
+  invisible: { opacity: 0 },
 });

@@ -17,13 +17,14 @@ type Props = {
   onTabChange: (tab: keyof RootTabParamList) => void;
 };
 
-const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
+const tabs = [
+  { name: 'TimerStart', label: 'タイマー' },
+  { name: 'TimerConfig', label: 'タイマー\n設定' },
+  { name: 'TimerSutta', label: '経典' },
+] as const;
+
+const FooterNavigator: React.FC<Props> = React.memo(({ activeTab, onTabChange }) => {
   const insets = useSafeAreaInsets();
-  const tabs = [
-    { name: 'TimerStart', label: 'タイマー' },
-    { name: 'TimerConfig', label: 'タイマー\n設定' },
-    { name: 'TimerSutta', label: '経典' },
-  ] as const;
 
   return (
     <View
@@ -45,22 +46,16 @@ const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
         return (
           <Pressable
             key={tab.name}
-            style={styles.button} // ★ 横並び & 均等幅に戻す
+            style={styles.button}
             android_ripple={{ color: '#00000022', borderless: false }}
             onPress={() => onTabChange(tab.name)}
           >
-            {/* ★ SVGを“背景”として全面に敷く（重ね順は下） */}
             <Icon
               width="110%"
               height="110%"
-              // react-native-svg に百分率指定可。全面に貼るため absoluteFillObject を併用
               style={RNStyleSheet.absoluteFillObject as any}
-              // 必要なら次の1行で切り抜き方を制御（SVG の viewBox がある前提）
-              // preserveAspectRatio="xMidYMid slice"
-              pointerEvents="none" // タップをテキストに通す
+              pointerEvents="none"
             />
-
-            {/* ★ 前面にテキスト（重なり実現） */}
             <Text
               style={[styles.label, isActive ? styles.labelActive : styles.labelInactive]}
             >
@@ -71,29 +66,27 @@ const FooterNavigator: React.FC<Props> = ({ activeTab, onTabChange }) => {
       })}
     </View>
   );
-};
+});
 
 export default FooterNavigator;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row', // ★ 横並び
+    flexDirection: 'row',
     backgroundColor: '#E0EEF9',
   },
   button: {
-    flex: 1, // ★ 各ボタンを等分
-    position: 'relative', // ★ 子のabsolute配置の基準にする
+    flex: 1,
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
-    // 必要ならタップ領域を調整：
-    // paddingVertical: 6, paddingHorizontal: 8,
   },
   label: {
-    position: 'absolute', // ★ 背景SVGの上に重ねる
+    position: 'absolute',
     marginLeft: 15,
     fontSize: 18,
-    fontFamily: 'ZenMaruGothic-Medium',
+    fontFamily: 'ZenMaruGothicMedium',
     textAlign: 'center',
   },
   labelActive: { color: '#FEEF94' },

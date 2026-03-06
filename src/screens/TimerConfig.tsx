@@ -68,7 +68,7 @@ export const orinList: OrinType[] = [
     id: '10',
     name: 'おりん6',
     image: require('../../assets/おりん10.jpg'),
-    sound: require('../../assets/mp3/鐘1_20241110_173133.mp3'),
+    sound: require('../../assets/mp3/kane1.mp3'),
   },
 ];
 
