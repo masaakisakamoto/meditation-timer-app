@@ -13,6 +13,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import type { AudioPlayer, AudioStatus } from 'expo-audio';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Header from '../components/Header/Header';
@@ -128,7 +129,6 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     lastHandledSegmentRef.current = -1;
     if (isPlaying) {
-      console.log('Timer started, resetting nextIdx to 0');
       setNextIdx(0);
     }
   }, [isPlaying]);
@@ -141,6 +141,11 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   // バックグラウンド中に経過した区切りをスキップするための管理 ref
   // -1 = 未処理, n = インデックス n の区切りまで処理済み（再生またはスキップ）
   const lastHandledSegmentRef = useRef(-1);
+  // 復帰直後の1回だけ鐘を無音スキップするフラグ
+  const skipBellOnResumeRef = useRef(false);
+  // バックグラウンド中フラグ: 非 active 遷移でセット、syncFromNowWithoutBell 完了でリセット
+  // catch-up より先に bell effect が走っても鐘を抑止するためのガード
+  const wasBackgroundedRef = useRef(false);
 
   /* ---------- 区切り・終了通知スケジュール管理 ---------- */
   useEffect(() => {
@@ -271,33 +276,25 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const safeStopAudio = useCallback(() => {
     if (!isMountedRef.current) return;
 
-    console.log('Attempting to stop audio players');
-
     // 経典の停止
     if (suttaStatus?.playing) {
       try {
         suttaPlayer.pause();
-      } catch (error) {
-        console.log('Sutra player already released');
-      }
+      } catch (error) {}
     }
 
     // 唱題の停止
     if (sangeStatus?.playing) {
       try {
         sangePlayer.pause();
-      } catch (error) {
-        console.log('Sange player already released');
-      }
+      } catch (error) {}
     }
 
     // 開始時のおりんの停止
     if (orinStatus?.playing) {
       try {
         orinPlayer.pause();
-      } catch (error) {
-        console.log('Orin player already released');
-      }
+      } catch (error) {}
     }
 
     // タイマー用のおりんプレイヤーを停止
@@ -305,9 +302,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     for (const player of timerPlayers) {
       try {
         player.pause();
-      } catch (error) {
-        console.log('Timer bell player already released');
-      }
+      } catch (error) {}
     }
 
     // プレイヤーの状態を無効化
@@ -320,32 +315,23 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     return () => {
       if (isMountedRef.current) {
-        console.log('Component unmounting, cleaning up');
         isMountedRef.current = false;
 
         // 直接クリーンアップを実行（safeStopAudioの依存関係を避ける）
         try {
           suttaPlayer.pause();
-        } catch (error) {
-          console.log('Sutra player already released during unmount');
-        }
+        } catch (error) {}
         try {
           sangePlayer.pause();
-        } catch (error) {
-          console.log('Sange player already released during unmount');
-        }
+        } catch (error) {}
         try {
           orinPlayer.pause();
-        } catch (error) {
-          console.log('Orin player already released during unmount');
-        }
+        } catch (error) {}
         const timerPlayers = [firstBellPlayer, secondBellPlayer, thirdBellPlayer];
         for (const player of timerPlayers) {
           try {
             player.pause();
-          } catch (error) {
-            console.log('Timer bell player already released during unmount');
-          }
+          } catch (error) {}
         }
 
         // スケジュール済み通知を全てキャンセル
@@ -503,41 +489,61 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     return () => clearInterval(id);
   }, [isPlaying, computeSecFromNow]);
 
-  // ✅ スリープ/バックグラウンド復帰で即座にsecを再計算
+  // ✅ バックグラウンド/画面離脱からの復帰時に sec・nextIdx・スキップフラグを同期する共通処理
+  // AppState active と useFocusEffect の両経路から呼ばれる
+  const syncFromNowWithoutBell = useCallback(() => {
+    if (!isMountedRef.current) return;
+    if (!isPlayingRef.current) return;
+
+    // バックグラウンドでタイマーが終了していた場合: 鐘を鳴らさず finished 状態にするだけ
+    // （通知がシステムで既に鳴動済みのため二重鳴動を防ぐ）
+    if (endsAtRef.current !== null && Date.now() >= endsAtRef.current) {
+      setSec(mode === 'countdown' ? 0 : totalSec);
+      setNextIdx(cumulativeSecs.length);
+      setPlaying(false);
+      return;
+    }
+
+    const next = computeSecFromNow();
+    if (next == null) return;
+
+    setSec(next);
+
+    // ✅ 途中で時間が飛んだ時、次のおりん位置もズレないように合わせる（鳴らし漏れ防止）
+    const elapsedSec = mode === 'countup' ? next : Math.max(0, totalSec - next);
+    const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
+    const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
+    setNextIdx(resolvedNextIdx);
+
+    // バックグラウンド中に区切りをまたいでいた場合はスキップフラグをセット
+    if (resolvedNextIdx - 1 > lastHandledSegmentRef.current) {
+      skipBellOnResumeRef.current = true;
+    }
+    // バックグラウンド中に経過した区切りをスキップ済みとしてマーク（catch-up 鳴動防止）
+    lastHandledSegmentRef.current = resolvedNextIdx - 1;
+    // catch-up 完了: bell effect のガードを解除
+    wasBackgroundedRef.current = false;
+  }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
+
+  // ✅ AppState active 経路（通常のバックグラウンド復帰）
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') return;
-      if (!isMountedRef.current) return;
-
-      // バックグラウンドでタイマーが終了していた場合: 鐘を鳴らさず finished 状態にするだけ
-      // （通知がシステムで既に鳴動済みのため二重鳴動を防ぐ）
-      if (
-        isPlayingRef.current &&
-        endsAtRef.current !== null &&
-        Date.now() >= endsAtRef.current
-      ) {
-        setSec(mode === 'countdown' ? 0 : totalSec);
-        setNextIdx(cumulativeSecs.length);
-        setPlaying(false);
+      if (state !== 'active') {
+        // background/inactive 遷移: bell effect ガードをセット
+        wasBackgroundedRef.current = true;
         return;
       }
-
-      const next = computeSecFromNow();
-      if (next == null) return;
-
-      setSec(next);
-
-      // ✅ 途中で時間が飛んだ時、次のおりん位置もズレないように合わせる（鳴らし漏れ防止）
-      const elapsedSec = mode === 'countup' ? next : Math.max(0, totalSec - next);
-      const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
-      const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
-      setNextIdx(resolvedNextIdx);
-      // バックグラウンド中に経過した区切りをスキップ済みとしてマーク（catch-up 鳴動防止）
-      lastHandledSegmentRef.current = resolvedNextIdx - 1;
+      syncFromNowWithoutBell();
     });
-
     return () => sub.remove();
-  }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
+  }, [syncFromNowWithoutBell]);
+
+  // ✅ 画面フォーカス経路（ロック解除→ホームからアプリを開く場合など AppState が発火しない経路）
+  useFocusEffect(
+    useCallback(() => {
+      syncFromNowWithoutBell();
+    }, [syncFromNowWithoutBell]),
+  );
 
   // フォアグラウンドで通知を受信した瞬間に区切りをスキップ済みとしてマーク
   // （バックグラウンド通知後の復帰時など、AppState と別経路で届く場合の二重鳴動防止）
@@ -599,6 +605,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   /* ---------- カウント中のおりん再生判定 ---------- */
   useEffect(() => {
     if (!isPlaying || nextIdx >= cumulativeSecs.length || !isMountedRef.current) return;
+    // バックグラウンド復帰の catch-up が完了するまで bell 処理を抑止
+    if (wasBackgroundedRef.current) return;
     const elapsedSec = mode === 'countup' ? sec : totalSec - sec;
 
     // 次のおりんのタイミングに達したかチェック
@@ -608,11 +616,13 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       nextIdx > lastHandledSegmentRef.current
     ) {
       lastHandledSegmentRef.current = nextIdx;
-      playTimerBell(nextIdx);
-      setNextIdx((prev) => {
-        const newIdx = prev + 1;
-        return newIdx;
-      });
+      setNextIdx((prev) => prev + 1);
+      if (skipBellOnResumeRef.current) {
+        // 復帰直後の1回だけ無音スキップ（バックグラウンド中の区切りを通知済みのため）
+        skipBellOnResumeRef.current = false;
+      } else {
+        playTimerBell(nextIdx);
+      }
     }
 
     // タイマー終了判定
