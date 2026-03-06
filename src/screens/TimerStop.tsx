@@ -108,6 +108,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const [sec, setSec] = useState(mode === 'countup' ? 0 : totalSec);
   const [isPlaying, setPlaying] = useState(false);
   const [nextIdx, setNextIdx] = useState(0);
+  // 開始前シーケンス（経典/おりん再生）中のフラグ
+  const [isPreparingSequence, setIsPreparingSequence] = useState(false);
 
   // ✅ 再生開始した瞬間に「開始時刻」を確定
   useEffect(() => {
@@ -232,7 +234,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   /* ---------- 画面スリープ防止 ---------- */
   useEffect(() => {
-    if (isPlaying && keepAwakeOn) {
+    if ((isPlaying && keepAwakeOn) || isPreparingSequence) {
       activateKeepAwakeAsync();
     } else {
       deactivateKeepAwake();
@@ -240,7 +242,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     return () => {
       deactivateKeepAwake();
     };
-  }, [isPlaying, keepAwakeOn]);
+  }, [isPlaying, keepAwakeOn, isPreparingSequence]);
 
   /* ---------- サウンド ---------- */
   // 選択されたおりんの音声ファイルを取得
@@ -355,6 +357,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     const startSequence = () => {
       if (!isMountedRef.current || !isActive) return;
 
+      setIsPreparingSequence(true);
       if (readingOn && isSuttaPlayerValid) {
         try {
           suttaPlayer.play();
@@ -377,6 +380,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     return () => {
       isActive = false;
       if (isMountedRef.current) {
+        setIsPreparingSequence(false);
         if (isSuttaPlayerValid) {
           try {
             suttaPlayer.pause();
@@ -468,6 +472,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     if (orinStatus.didJustFinish) {
       setTimeout(() => {
         if (isMountedRef.current) {
+          setIsPreparingSequence(false);
           setPlaying(true);
         }
       }, 500);
