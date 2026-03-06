@@ -126,6 +126,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   }, [isPlaying]);
 
   useEffect(() => {
+    lastHandledSegmentRef.current = -1;
     if (isPlaying) {
       console.log('Timer started, resetting nextIdx to 0');
       setNextIdx(0);
@@ -136,6 +137,10 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
+
+  // バックグラウンド中に経過した区切りをスキップするための管理 ref
+  // -1 = 未処理, n = インデックス n の区切りまで処理済み（再生またはスキップ）
+  const lastHandledSegmentRef = useRef(-1);
 
   /* ---------- 区切り・終了通知スケジュール管理 ---------- */
   useEffect(() => {
@@ -186,6 +191,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           title: isFinal ? '瞑想タイマー終了' : '区切り終了',
           body: isFinal ? '瞑想が完了しました' : `${idx + 1}/${total} セット完了`,
           sound: true,
+          data: { segmentIndex: idx },
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -524,11 +530,27 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       // ✅ 途中で時間が飛んだ時、次のおりん位置もズレないように合わせる（鳴らし漏れ防止）
       const elapsedSec = mode === 'countup' ? next : Math.max(0, totalSec - next);
       const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
-      setNextIdx(nextIndex === -1 ? cumulativeSecs.length : nextIndex);
+      const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
+      setNextIdx(resolvedNextIdx);
+      // バックグラウンド中に経過した区切りをスキップ済みとしてマーク（catch-up 鳴動防止）
+      lastHandledSegmentRef.current = resolvedNextIdx - 1;
     });
 
     return () => sub.remove();
   }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
+
+  // フォアグラウンドで通知を受信した瞬間に区切りをスキップ済みとしてマーク
+  // （バックグラウンド通知後の復帰時など、AppState と別経路で届く場合の二重鳴動防止）
+  useEffect(() => {
+    const sub = Notifications.addNotificationReceivedListener((notification) => {
+      const data = notification.request.content.data as Record<string, unknown>;
+      const rawIndex = data?.segmentIndex;
+      if (typeof rawIndex === 'number' && rawIndex >= 0) {
+        lastHandledSegmentRef.current = Math.max(lastHandledSegmentRef.current, rawIndex);
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   /* ---------- タイマー区切りのおりん再生 ---------- */
   const playTimerBell = useCallback(
@@ -568,7 +590,12 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     const elapsedSec = mode === 'countup' ? sec : totalSec - sec;
 
     // 次のおりんのタイミングに達したかチェック
-    if (elapsedSec >= cumulativeSecs[nextIdx]) {
+    // lastHandledSegmentRef より大きいインデックスの場合のみ鳴らす（バックグラウンド復帰後の二重鳴動防止）
+    if (
+      elapsedSec >= cumulativeSecs[nextIdx] &&
+      nextIdx > lastHandledSegmentRef.current
+    ) {
+      lastHandledSegmentRef.current = nextIdx;
       playTimerBell(nextIdx);
       setNextIdx((prev) => {
         const newIdx = prev + 1;
