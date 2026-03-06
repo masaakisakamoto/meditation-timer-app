@@ -149,10 +149,11 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       // モーダルを閉じる
       setShowOverlay(false);
 
-      // 音を再生
+      // 音を再生（先頭に戻してから再生）
       const player = players[orin.id];
       if (player) {
-        console.log('Playing sound for:', orin.name);
+        player.pause();
+        player.seekTo(0);
         await player.play();
       }
     } catch (error) {
