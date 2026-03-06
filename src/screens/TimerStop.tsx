@@ -552,6 +552,18 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     return () => sub.remove();
   }, []);
 
+  // 通知タップでアプリ復帰した場合にも区切りをスキップ済みとしてマーク
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      const rawIndex = data?.segmentIndex;
+      if (typeof rawIndex === 'number' && rawIndex >= 0) {
+        lastHandledSegmentRef.current = Math.max(lastHandledSegmentRef.current, rawIndex);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   /* ---------- タイマー区切りのおりん再生 ---------- */
   const playTimerBell = useCallback(
     (index: number) => {
