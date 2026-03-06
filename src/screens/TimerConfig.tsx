@@ -150,7 +150,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       setShowOverlay(false);
 
       // 他のおりんをすべて停止してから選択中のおりんを再生
-      Object.values(players).forEach((p) => p.pause());
+      Object.values(players).forEach((p) => p?.pause?.());
       const player = players[orin.id];
       if (player) {
         player.seekTo(0);
