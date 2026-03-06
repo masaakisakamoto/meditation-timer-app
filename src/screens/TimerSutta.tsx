@@ -232,6 +232,18 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
     }
   }, [isCurrentPlaying]);
 
+  // ロック画面メタデータ: player がロード済みかつ当該経典が再生中になったら設定
+  useEffect(() => {
+    if (isCurrentPlaying && status.isLoaded) {
+      player.setActiveForLockScreen(true, {
+        title: item.title,
+        artist: 'MitterTimer',
+        albumTitle: 'Pali Chanting',
+        artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
+      });
+    }
+  }, [isCurrentPlaying, status.isLoaded]);
+
   const onPress = () => {
     if (isPlaying) {
       // 同じ経典をタップ: 一時停止
@@ -240,12 +252,6 @@ const AudioPlayer: FC<AudioPlayerProps> = ({
       onPlayStateChange(false);
       setIsPaused(true);
     } else {
-      player.setActiveForLockScreen(true, {
-        title: item.title,
-        artist: 'MitterTimer',
-        albumTitle: 'Pali Chanting',
-        artworkUrl: Asset.fromModule(require('../../assets/icon.png')).uri,
-      });
       if (!isPaused || shouldRestartFromBeginning) {
         // 新規再生または別の経典から戻ってきた場合は最初から
         player.pause();
