@@ -149,10 +149,10 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       // モーダルを閉じる
       setShowOverlay(false);
 
-      // 音を再生（先頭に戻してから再生）
+      // 他のおりんをすべて停止してから選択中のおりんを再生
+      Object.values(players).forEach((p) => p.pause());
       const player = players[orin.id];
       if (player) {
-        player.pause();
         player.seekTo(0);
         await player.play();
       }
