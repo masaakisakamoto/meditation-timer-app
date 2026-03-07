@@ -21,7 +21,7 @@ import { RootStackParamList } from '../../App';
 import Header from '../components/Header/Header';
 import Timer from '../components/Body/TimerConfig/Timer';
 import TimerModeToggle from '../components/Body/TimerConfig/TimerModeToggle';
-import AlermConfigButton from '../components/Body/TimerConfig/AlermConfigButton';
+import AlarmConfigSection from '../components/feature/timer/AlarmConfigSection';
 import OrinButton from '../components/Body/TimerConfig/OrinButton';
 import OrinPickerModal, {
   Orin as OrinType,
@@ -129,16 +129,6 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
     });
   };
 
-  /** アラーム時間を 1 つ追加 */
-  const handleAddAlarm = (minutes: number) => {
-    setAlarmTimes((prev) => {
-      const next = [...prev] as [number, number, number];
-      const idx = next.findIndex((v) => v === 0);
-      if (idx !== -1) next[idx] = minutes;
-      return next;
-    });
-  };
-
   /** おりん選択時の処理 */
   const handleOrinSelect = async (orin: OrinType) => {
     try {
@@ -170,8 +160,17 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         {/* 円形タイマー＋現在の 3 つの分 */}
         <Timer times={alarmTimes} />
 
-        {/* アラーム追加 */}
-        <AlermConfigButton onAdd={handleAddAlarm} />
+        {/* アラーム設定 */}
+        <AlarmConfigSection
+          times={alarmTimes}
+          onSetTime={(idx, min) =>
+            setAlarmTimes((prev) => {
+              const next = [...prev] as [number, number, number];
+              next[idx] = min;
+              return next;
+            })
+          }
+        />
 
         {/* カウント方向トグル */}
         <TimerModeToggle
