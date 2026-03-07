@@ -4,7 +4,9 @@ import { Pressable, Text, StyleSheet, Modal, View, ScrollView } from 'react-nati
 import ModalPanel from '../../ui/ModalPanel';
 
 const PROD_OPTIONS = [0, ...Array.from({ length: 12 }, (_, i) => (i + 1) * 5)];
-const MINUTE_OPTIONS = __DEV__ ? [0, 0.5, 1, ...PROD_OPTIONS.slice(1)] : PROD_OPTIONS;
+const MINUTE_OPTIONS = __DEV__
+  ? [0, 10 / 60, 0.5, 1, ...PROD_OPTIONS.slice(1)]
+  : PROD_OPTIONS;
 
 const formatMin = (min: number): string => {
   if (min === 0) return '未設定';
