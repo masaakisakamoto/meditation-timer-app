@@ -29,6 +29,7 @@ const TimerStartDisplay: FC<TimerProps> = ({
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
+  const pressScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const makeLoop = (value: Animated.Value, toValue: number) =>
@@ -42,18 +43,32 @@ const TimerStartDisplay: FC<TimerProps> = ({
     makeLoop(breathScale, 0.97).start();
   }, [breathOpacity, breathScale]);
 
+  const handleStart = () => {
+    Animated.sequence([
+      Animated.timing(pressScale, {
+        toValue: 1.03,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pressScale, { toValue: 1, duration: 120, useNativeDriver: true }),
+    ]).start(() => onToggle());
+  };
+
   return (
     <SafeAreaView style={styles.timer}>
       <Animated.View
         style={[
           styles.animatedContainer,
-          { opacity: breathOpacity, transform: [{ scale: breathScale }] },
+          {
+            opacity: breathOpacity,
+            transform: [{ scale: breathScale }, { scale: pressScale }],
+          },
         ]}
       >
         <TimerBackground width="100%" height="100%" style={styles.timerBackground} />
 
         {/* スタート／リセット ボタン */}
-        <Pressable style={styles.startButton} onPress={onToggle}>
+        <Pressable style={styles.startButton} onPress={handleStart}>
           <View style={styles.startCircle} />
           <Image source={Polygon1} style={styles.startIcon} />
         </Pressable>
