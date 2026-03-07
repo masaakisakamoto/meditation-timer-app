@@ -205,7 +205,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       {/* おりん一覧モーダル */}
       <Modal
         visible={showOverlay}
-        animationType="slide"
+        animationType="fade"
         transparent
         onRequestClose={() => setShowOverlay(false)}
       >

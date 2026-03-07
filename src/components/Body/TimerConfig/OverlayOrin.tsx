@@ -2,7 +2,6 @@
 
 import React, { FC } from 'react';
 import { View, Text, Image, Pressable, StyleSheet, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type Orin = {
   id: string;
@@ -22,34 +21,38 @@ type Props = {
 
 const OverlayOrin: FC<Props> = ({ orins, onSelect, onClose }) => {
   return (
-    <SafeAreaView style={styles.overlayContainer}>
-      {/* ヘッダー部分 */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>おりんを選択</Text>
-        <Pressable onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeText}>×</Text>
-        </Pressable>
-      </View>
+    <View style={styles.overlayContainer}>
+      <View style={styles.backdrop}>
+        <View style={styles.panel}>
+          {/* ヘッダー部分 */}
+          <View style={styles.header}>
+            <Text style={styles.headerText}>おりんを選択</Text>
+            <Pressable onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeText}>×</Text>
+            </Pressable>
+          </View>
 
-      {/* おりんリスト */}
-      <FlatList
-        data={orins}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => onSelect(item)}
-            style={({ pressed }) => [
-              styles.item,
-              pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <Image source={item.image} style={styles.icon} />
-            <Text style={styles.name}>{item.name}</Text>
-          </Pressable>
-        )}
-      />
-    </SafeAreaView>
+          {/* おりんリスト */}
+          <FlatList
+            data={orins}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => onSelect(item)}
+                style={({ pressed }) => [
+                  styles.item,
+                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+                ]}
+              >
+                <Image source={item.image} style={styles.icon} />
+                <Text style={styles.name}>{item.name}</Text>
+              </Pressable>
+            )}
+          />
+        </View>
+      </View>
+    </View>
   );
 };
 
@@ -58,9 +61,21 @@ export default OverlayOrin;
 const styles = StyleSheet.create({
   overlayContainer: {
     flex: 1,
-    backgroundColor: '#fcdfa5',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  backdrop: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  panel: {
+    width: '100%',
+    maxWidth: 500,
+    maxHeight: '90%',
+    backgroundColor: '#fcdfa5',
+    borderRadius: 20,
     padding: 20,
   },
   header: {
