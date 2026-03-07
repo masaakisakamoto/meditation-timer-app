@@ -1,38 +1,76 @@
 // src/components/Body/TimerConfig/TimerModeToggle.tsx
-import React, { FC } from 'react';
-import { SafeAreaView, Pressable, View, Text, StyleSheet } from 'react-native';
+import React, { FC, useState } from 'react';
+import { Pressable, Text, StyleSheet, Modal, View } from 'react-native';
+import ModalPanel from '../../ui/ModalPanel';
 
 export type Mode = 'countdown' | 'countup';
 
 type Props = {
   /** 現在のモード */
   mode: Mode;
-  /** 押されたときにモードを切り替える */
-  onToggle: () => void;
+  /** モードが選択されたときに呼ばれる */
+  onSelect: (mode: Mode) => void;
 };
 
-const TimerModeToggle: FC<Props> = ({ mode, onToggle }) => {
-  const isDown = mode === 'countdown';
+const modeLabel: Record<Mode, string> = {
+  countdown: 'カウントダウン',
+  countup: 'カウントアップ',
+};
+
+const options: { mode: Mode; label: string; sample: string }[] = [
+  { mode: 'countup', label: 'カウントアップ', sample: '1, 2, 3… と増える' },
+  { mode: 'countdown', label: 'カウントダウン', sample: '3, 2, 1… と減る' },
+];
+
+const TimerModeToggle: FC<Props> = ({ mode, onSelect }) => {
+  const [showModal, setShowModal] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <Pressable
+        onPress={() => setShowModal(true)}
         style={({ pressed }) => [
-          styles.button,
-          isDown ? styles.downBg : styles.upBg,
-          pressed && { opacity: 0.7 },
+          styles.container,
+          pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
         ]}
-        onPress={onToggle}
       >
-        <Text style={[styles.label, isDown ? styles.downText : styles.upText]}>
-          {isDown ? 'カウントダウンする' : 'カウントアップする'}
-        </Text>
-        <View style={[styles.indicator, isDown ? styles.downInd : styles.upInd]} />
-        <Text style={[styles.countSample, isDown ? styles.downSample : styles.upSample]}>
-          {isDown ? '5,4,3…' : '1,2,3…'}
-        </Text>
+        <Text style={styles.label}>タイマー方式</Text>
+        <View style={styles.right}>
+          <Text style={styles.current}>{modeLabel[mode]}</Text>
+          <Text style={styles.chevron}>›</Text>
+        </View>
       </Pressable>
-    </SafeAreaView>
+
+      <Modal
+        visible={showModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowModal(false)}
+      >
+        <ModalPanel title="タイマー方式" onClose={() => setShowModal(false)}>
+          {options.map((opt) => (
+            <Pressable
+              key={opt.mode}
+              onPress={() => {
+                onSelect(opt.mode);
+                setShowModal(false);
+              }}
+              style={({ pressed }) => [
+                styles.option,
+                mode === opt.mode && styles.optionSelected,
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              <View style={styles.optionTextBlock}>
+                <Text style={styles.optionLabel}>{opt.label}</Text>
+                <Text style={styles.optionSample}>{opt.sample}</Text>
+              </View>
+              {mode === opt.mode && <Text style={styles.checkmark}>✓</Text>}
+            </Pressable>
+          ))}
+        </ModalPanel>
+      </Modal>
+    </>
   );
 };
 
@@ -40,69 +78,63 @@ export default TimerModeToggle;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
     width: '90%',
-    height: 60,
-    borderRadius: 15,
-    position: 'relative',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+    backgroundColor: '#fcdfa5',
+    borderRadius: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginVertical: 8,
   },
-  // 背景色
-  downBg: { backgroundColor: '#fcdfa5' },
-  upBg: { backgroundColor: '#fcdfa5' },
-
-  // ラベル
   label: {
-    fontSize: 20,
-    lineHeight: 25,
-    fontFamily: 'ZenMaruGothicMedium',
-    fontWeight: '500',
-    textAlign: 'center',
-    position: 'absolute',
-    left: '5%', // 左端の余白5%
-    right: '28%', // 右側のサンプル数字分を避ける
-    flexShrink: 1, // テキストを縮小可能に
-  },
-  downText: { color: '#000' },
-  upText: { color: '#000' },
-
-  // サンプル数字背景
-  indicator: {
-    position: 'absolute',
-    borderRadius: 12,
-    width: '20%',
-    height: '60%',
-    right: '5%',
-    top: '20%',
-  },
-  downInd: {
-    backgroundColor: '#fff095',
-  },
-  upInd: {
-    backgroundColor: '#f9c04c',
-  },
-
-  // サンプル数字
-  countSample: {
-    position: 'absolute',
     fontSize: 16,
-    fontFamily: 'GothicA1-Medium',
-    fontWeight: '500',
-    right: '8%',
-    top: '50%',
-    transform: [{ translateY: -8 }],
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#000',
   },
-  downSample: {
-    color: '#aba686',
+  right: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  upSample: {
-    color: '#fff',
+  current: {
+    fontSize: 15,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  chevron: {
+    fontSize: 20,
+    color: '#C7C7CC',
+    lineHeight: 22,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  optionSelected: {
+    backgroundColor: '#fffde7',
+  },
+  optionTextBlock: {
+    gap: 2,
+  },
+  optionLabel: {
+    fontSize: 17,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#000',
+  },
+  optionSample: {
+    fontSize: 13,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#888',
+  },
+  checkmark: {
+    fontSize: 18,
+    color: '#4a90d9',
   },
 });

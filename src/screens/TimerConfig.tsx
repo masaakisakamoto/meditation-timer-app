@@ -176,11 +176,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         {/* カウント方向トグル */}
         <TimerModeToggle
           mode={configCtx.config.mode}
-          onToggle={() =>
-            configCtx.setMode(
-              configCtx.config.mode === 'countdown' ? 'countup' : 'countdown',
-            )
-          }
+          onSelect={(m) => configCtx.setMode(m)}
         />
 
         {/* 画面スリープ防止 */}
