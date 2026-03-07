@@ -23,9 +23,9 @@ import Timer from '../components/Body/TimerConfig/Timer';
 import TimerModeToggle from '../components/Body/TimerConfig/TimerModeToggle';
 import AlermConfigButton from '../components/Body/TimerConfig/AlermConfigButton';
 import OrinButton from '../components/Body/TimerConfig/OrinButton';
-import OverlayOrin, {
+import OrinPickerModal, {
   Orin as OrinType,
-} from '../components/Body/TimerConfig/OverlayOrin';
+} from '../components/feature/timer/OrinPickerModal';
 import ActionButtons from '../components/Body/TimerConfig/SaveButton'; // ← リセット+保存 を 1 つにまとめたもの
 
 /* ---------- props 型 ---------- */
@@ -209,7 +209,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         transparent
         onRequestClose={() => setShowOverlay(false)}
       >
-        <OverlayOrin
+        <OrinPickerModal
           orins={orinList}
           onSelect={handleOrinSelect}
           onClose={() => setShowOverlay(false)}

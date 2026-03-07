@@ -22,7 +22,7 @@ import Timer from '../components/Body/TimerStop/Timer';
 import { RootStackParamList } from '../../App';
 import { ConfigContext } from '../context/ConfigContext';
 import { orinList } from './TimerConfig';
-import type { Orin } from '../components/Body/TimerConfig/OverlayOrin';
+import type { Orin } from '../components/feature/timer/OrinPickerModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TimerStop'>;
 

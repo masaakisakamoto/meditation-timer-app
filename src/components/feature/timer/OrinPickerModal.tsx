@@ -1,8 +1,7 @@
-// src/components/Body/TimerConfig/OverlayOrin.tsx
-
+// src/components/feature/timer/OrinPickerModal.tsx
 import React, { FC } from 'react';
 import { Text, Image, Pressable, StyleSheet, FlatList } from 'react-native';
-import ModalPanel from '../../common/ModalPanel';
+import ModalPanel from '../../ui/ModalPanel';
 
 export type Orin = {
   id: string;
@@ -20,7 +19,7 @@ type Props = {
   onClose: () => void;
 };
 
-const OverlayOrin: FC<Props> = ({ orins, onSelect, onClose }) => {
+const OrinPickerModal: FC<Props> = ({ orins, onSelect, onClose }) => {
   return (
     <ModalPanel title="おりんを選択" onClose={onClose}>
       {/* おりんリスト */}
@@ -45,7 +44,7 @@ const OverlayOrin: FC<Props> = ({ orins, onSelect, onClose }) => {
   );
 };
 
-export default OverlayOrin;
+export default OrinPickerModal;
 
 const styles = StyleSheet.create({
   list: {
