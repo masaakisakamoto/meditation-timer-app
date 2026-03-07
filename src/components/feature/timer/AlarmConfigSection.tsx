@@ -30,7 +30,7 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
             pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
           ]}
         >
-          <Text style={styles.label}>アラーム {idx + 1}</Text>
+          <Text style={styles.label}>{`🔔 アラーム ${idx + 1}`}</Text>
           <View style={styles.right}>
             <Text style={styles.current}>{`${min}分`}</Text>
             <Text style={styles.chevron}>›</Text>

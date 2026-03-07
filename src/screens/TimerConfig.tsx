@@ -215,6 +215,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         onRequestClose={() => setShowSettings(false)}
       >
         <ModalPanel title="設定" onClose={() => setShowSettings(false)}>
+          <Text style={styles.settingSection}>タイマー動作</Text>
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>タイマー中は画面をスリープさせない</Text>
             <Switch
@@ -260,6 +261,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
+  },
+  settingSection: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginBottom: 8,
+    marginTop: 4,
+    alignSelf: 'flex-start',
   },
   settingLabel: {
     fontFamily: 'ZenMaruGothicMedium',
