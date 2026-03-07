@@ -648,6 +648,23 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   /* ---------- 表示文字列 ---------- */
   const displayTime = new Date(sec * 1000).toISOString().substring(11, 19);
 
+  /* おりん残り秒数（準備中かつおりん再生中かつ duration 確定済みの場合のみ） */
+  const orinCountdown =
+    isPreparingSequence &&
+    (orinStatus?.playing ?? false) &&
+    (orinStatus?.duration ?? 0) > 0
+      ? Math.max(0, Math.ceil(orinStatus!.duration - orinStatus!.currentTime))
+      : null;
+
+  /* 準備フェーズ: isPreparingSequence の遅延を吸収し、再生中の状態を明示 */
+  const preparePhase: 'reading' | 'orin' | 'running' = !isPreparingSequence
+    ? 'running'
+    : (orinStatus?.playing ?? false)
+      ? 'orin'
+      : readingOn && ((suttaStatus?.playing ?? false) || (sangeStatus?.playing ?? false))
+        ? 'reading'
+        : 'running'; // おりん終了〜isPreparingSequence解除の間もrunningとして扱う
+
   /* ---------- UI ---------- */
   return (
     <SafeAreaView style={styles.container}>
@@ -656,6 +673,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         <Timer
           time={displayTime}
           isPlaying={isPlaying}
+          preparePhase={preparePhase}
+          orinCountdown={orinCountdown}
           onTogglePause={() => {
             setPlaying((p) => !p);
           }}

@@ -5,11 +5,15 @@ import TimerBackgroundB from '../../../../assets/TimerBackGroundB.svg';
 import PauseIcon from '../../../../assets/PauseButton.svg';
 import StopIcon from '../../../../assets/StopButton.svg';
 
+export type PreparePhase = 'reading' | 'orin' | 'running';
+
 export type TimerControlsProps = {
   time: string;
   isPlaying: boolean;
   onTogglePause: () => void;
   onStop: () => void;
+  preparePhase?: PreparePhase;
+  orinCountdown?: number | null;
 };
 
 // Pick sizes that fit well
@@ -21,6 +25,8 @@ const TimerControls: FC<TimerControlsProps> = ({
   isPlaying,
   onTogglePause,
   onStop,
+  preparePhase = 'running',
+  orinCountdown = null,
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
@@ -46,7 +52,19 @@ const TimerControls: FC<TimerControlsProps> = ({
       >
         <TimerBackgroundB width="100%" height="100%" style={styles.background} />
 
-        <Text style={styles.timeText}>{time}</Text>
+        {preparePhase === 'orin' && (orinCountdown ?? 0) > 0 ? (
+          <View style={styles.countdownBlock}>
+            <Text style={styles.countdownText}>{orinCountdown}</Text>
+            <Text style={styles.countdownLabel}>おりん終了後に開始</Text>
+          </View>
+        ) : preparePhase === 'reading' ? (
+          <View style={styles.preparingMessage}>
+            <Text style={styles.preparingText}>経典を読み上げています…</Text>
+            <Text style={styles.preparingText}>おりん終了後にタイマーが始まります</Text>
+          </View>
+        ) : (
+          <Text style={styles.timeText}>{time}</Text>
+        )}
 
         <View style={styles.controls}>
           <Pressable onPress={onTogglePause} style={styles.pauseButton}>
@@ -117,5 +135,38 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     marginHorizontal: -10,
+  },
+  preparingMessage: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    gap: 6,
+  },
+  preparingText: {
+    fontSize: 15,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  countdownBlock: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    gap: 4,
+  },
+  countdownText: {
+    fontSize: 72,
+    fontFamily: 'DidactGothic-Regular',
+    color: '#000',
+    textAlign: 'center',
+  },
+  countdownLabel: {
+    fontSize: 14,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+    textAlign: 'center',
   },
 });
