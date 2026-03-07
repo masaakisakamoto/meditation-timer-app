@@ -25,11 +25,14 @@ const OrinButton: FC<Props> = ({ selected, onPress }) => {
         pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
       ]}
     >
-      <View style={styles.background} />
-      <Text style={styles.label} numberOfLines={1} ellipsizeMode="tail">
-        ＞おりんの種類：{selected.name}
-      </Text>
-      <Image source={selected.image} style={styles.icon} />
+      <Text style={styles.label}>おりんの種類</Text>
+      <View style={styles.right}>
+        <Image source={selected.image} style={styles.icon} />
+        <Text style={styles.name} numberOfLines={1}>
+          {selected.name}
+        </Text>
+        <Text style={styles.chevron}>›</Text>
+      </View>
     </Pressable>
   );
 };
@@ -38,45 +41,41 @@ export default OrinButton;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    marginVertical: 12,
-    marginBottom: 40,
-  },
-  background: {
-    position: 'absolute',
-    top: 0,
     width: '90%',
-    height: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#fcdfa5',
     borderRadius: 15,
-    left: '5%',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginVertical: 8,
   },
   label: {
-    position: 'absolute',
-    top: 18,
-    fontSize: 20,
-    lineHeight: 25,
-    letterSpacing: -0.4,
-    fontWeight: '500',
-    fontFamily: 'ZenMaruGothic-Medium',
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothicMedium',
     color: '#000',
-    textAlign: 'center',
-    width: '80%',
-    flexShrink: 1,
-    paddingHorizontal: 10,
+  },
+  right: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   icon: {
-    position: 'absolute',
-    bottom: -50,
-    alignSelf: 'center',
-    width: 60,
-    height: 60,
+    width: 28,
+    height: 28,
     resizeMode: 'cover',
-    borderRadius: 30,
-    zIndex: 1,
+    borderRadius: 14,
+  },
+  name: {
+    fontSize: 15,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+    maxWidth: 100,
+  },
+  chevron: {
+    fontSize: 20,
+    color: '#aaa',
+    lineHeight: 22,
   },
 });
