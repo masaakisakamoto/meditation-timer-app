@@ -17,7 +17,11 @@ const TimerModeToggle: FC<Props> = ({ mode, onToggle }) => {
   return (
     <SafeAreaView style={styles.container}>
       <Pressable
-        style={[styles.button, isDown ? styles.downBg : styles.upBg]}
+        style={({ pressed }) => [
+          styles.button,
+          isDown ? styles.downBg : styles.upBg,
+          pressed && { opacity: 0.8 },
+        ]}
         onPress={onToggle}
       >
         <Text style={[styles.label, isDown ? styles.downText : styles.upText]}>
