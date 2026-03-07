@@ -18,7 +18,13 @@ type Props = {
 
 const OrinButton: FC<Props> = ({ selected, onPress }) => {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.container,
+        pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+      ]}
+    >
       <View style={styles.background} />
       <Text style={styles.label} numberOfLines={1} ellipsizeMode="tail">
         ＞おりんの種類：{selected.name}

@@ -213,7 +213,6 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
           orins={orinList}
           onSelect={handleOrinSelect}
           onClose={() => setShowOverlay(false)}
-          players={players} // AudioPlayerを親から渡す
         />
       </Modal>
     </SafeAreaView>

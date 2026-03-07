@@ -20,7 +20,7 @@ const TimerModeToggle: FC<Props> = ({ mode, onToggle }) => {
         style={({ pressed }) => [
           styles.button,
           isDown ? styles.downBg : styles.upBg,
-          pressed && { opacity: 0.8 },
+          pressed && { opacity: 0.7 },
         ]}
         onPress={onToggle}
       >
