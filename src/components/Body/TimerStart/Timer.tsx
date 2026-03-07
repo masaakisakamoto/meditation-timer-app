@@ -19,6 +19,7 @@ interface TimerProps {
   onToggle: () => void;
   isReading: boolean;
   toggleReading: () => void;
+  hasSelectedCourse?: boolean;
 }
 
 const TimerStartDisplay: FC<TimerProps> = ({
@@ -26,6 +27,7 @@ const TimerStartDisplay: FC<TimerProps> = ({
   onToggle,
   isReading,
   toggleReading,
+  hasSelectedCourse = true,
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
@@ -68,9 +70,23 @@ const TimerStartDisplay: FC<TimerProps> = ({
         <TimerBackground width="100%" height="100%" style={styles.timerBackground} />
 
         {/* スタート／リセット ボタン */}
-        <Pressable style={styles.startButton} onPress={handleStart}>
-          <View style={styles.startCircle} />
-          <Image source={Polygon1} style={styles.startIcon} />
+        <Pressable
+          style={styles.startButton}
+          onPress={handleStart}
+          hitSlop={{ top: 14, bottom: 14, left: 20, right: 20 }}
+        >
+          {({ pressed }) => (
+            <>
+              <View
+                style={[
+                  styles.startCircle,
+                  !hasSelectedCourse && styles.startCircleDimmed,
+                  pressed && styles.startCirclePressed,
+                ]}
+              />
+              <Image source={Polygon1} style={styles.startIcon} />
+            </>
+          )}
         </Pressable>
 
         {/* 経典読み上げ SVG ボタン (SVGにテキスト＋アイコン含む) */}
@@ -130,6 +146,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 3,
+  },
+  startCircleDimmed: {
+    opacity: 0.45,
+  },
+  startCirclePressed: {
+    opacity: 0.75,
   },
   startIcon: { width: 31, height: 25, resizeMode: 'contain' },
   readingButton: {

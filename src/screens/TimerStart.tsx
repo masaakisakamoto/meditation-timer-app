@@ -74,6 +74,7 @@ export const TimerStart: FC = () => {
           onToggle={handleNavigateToStop}
           isReading={readingOn} // ← グローバルから
           toggleReading={toggleReading} // ← グローバル setter
+          hasSelectedCourse={courseTimes.length > 0}
         />
 
         {/* ② アラーム時間 */}
