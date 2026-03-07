@@ -13,7 +13,9 @@ import MyCource from '../components/Body/TimerStart/MyCource';
 import Timer from '../components/Body/TimerStart/Timer';
 
 import { CourseContext } from '../context/CourseContext';
+import type { Course } from '../context/CourseContext';
 import { ConfigContext } from '../context/ConfigContext';
+import { orinList } from './TimerConfig';
 
 /* --- 型 --- */
 type Nav = CompositeNavigationProp<
@@ -35,7 +37,11 @@ export const TimerStart: FC = () => {
   const [courseTimes, setCourseTimes] = useState<number[]>([]);
 
   /*─── ハンドラ ───*/
-  const handleSelectCourse = (times: number[]) => setCourseTimes(times);
+  const handleSelectCourse = (course: Course) => {
+    setCourseTimes(course.times);
+    configCtx.setMode((course.mode ?? 'countup') as 'countup' | 'countdown');
+    configCtx.setRingType(course.ringType ?? '4');
+  };
 
   const handleDeleteCourse = (id: string) => {
     deleteCourse(id);
@@ -73,6 +79,7 @@ export const TimerStart: FC = () => {
         {/* ③ マイコース一覧 */}
         <MyCource
           courses={courses}
+          orins={orinList}
           onSelect={handleSelectCourse}
           onDelete={handleDeleteCourse}
         />

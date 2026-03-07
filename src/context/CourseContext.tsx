@@ -2,11 +2,16 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type Course = { id: string; times: number[] };
+export type Course = {
+  id: string;
+  times: number[];
+  mode?: string;
+  ringType?: string;
+};
 
 type CourseContextType = {
   courses: Course[];
-  addCourse: (times: number[]) => void;
+  addCourse: (times: number[], mode: string, ringType: string) => void;
   deleteCourse: (id: string) => void;
 };
 
@@ -29,9 +34,9 @@ export const CourseProvider = ({ children }: { children: ReactNode }) => {
   }, [courses]);
 
   /* 追加／削除 Helper */
-  const addCourse = (times: number[]) => {
+  const addCourse = (times: number[], mode: string, ringType: string) => {
     const id = `c${Date.now()}`;
-    setCourses((prev) => [...prev, { id, times }]);
+    setCourses((prev) => [...prev, { id, times, mode, ringType }]);
   };
   const deleteCourse = (id: string) => {
     setCourses((prev) => prev.filter((c) => c.id !== id));

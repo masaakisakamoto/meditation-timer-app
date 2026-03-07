@@ -125,7 +125,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       return;
     }
     // マイコースとして保存
-    addCourse(alarmTimes);
+    addCourse(alarmTimes, configCtx.config.mode, configCtx.config.ringType);
 
     // TimerStart画面に戻る
     onFinished?.();

@@ -1,17 +1,19 @@
 // src/components/Body/TimerStart/MyCource.tsx
 import React, { FC } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import type { Course } from '../../../context/CourseContext';
 
-type Course = { id: string; times: number[] };
+type OrinItem = { id: string; image: number };
 type Props = {
   courses: Course[];
-  onSelect: (times: number[]) => void;
+  orins: OrinItem[];
+  onSelect: (course: Course) => void;
   onDelete: (id: string) => void;
 };
 
 const deleteIcon = require('../../../../assets/DeleteButton.png');
 
-const MyCource: FC<Props> = ({ courses, onSelect, onDelete }) => (
+const MyCource: FC<Props> = ({ courses, orins, onSelect, onDelete }) => (
   <View style={styles.container}>
     <Text style={[styles.title, courses.length === 0 && styles.titleNoItems]}>
       マイコース
@@ -27,10 +29,26 @@ const MyCource: FC<Props> = ({ courses, onSelect, onDelete }) => (
       courses.map((course) => (
         <View key={course.id} style={styles.courseItem}>
           {/* 選択ボタン */}
-          <Pressable style={styles.selectButton} onPress={() => onSelect(course.times)}>
-            <Text style={styles.selectText}>
-              {course.times.map((t) => `${t}分`).join('　')}
-            </Text>
+          <Pressable style={styles.selectButton} onPress={() => onSelect(course)}>
+            <View style={styles.courseRow}>
+              <View style={styles.timesBlock}>
+                <Text style={styles.selectText}>
+                  {course.times.map((t) => `${t}分`).join('　')}
+                </Text>
+              </View>
+              <View style={styles.metaBlock}>
+                <Text style={styles.modeArrow}>
+                  {(course.mode ?? 'countup') === 'countup' ? '▲' : '▼'}
+                </Text>
+                <Image
+                  source={
+                    (orins.find((o) => o.id === (course.ringType ?? '4')) ?? orins[0])
+                      .image
+                  }
+                  style={styles.orinThumb}
+                />
+              </View>
+            </View>
           </Pressable>
 
           {/* 削除ボタン */}
@@ -83,7 +101,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#000',
-    textAlign: 'center',
   },
   deleteButton: {
     marginTop: 15,
@@ -109,5 +126,29 @@ const styles = StyleSheet.create({
     fontFamily: 'ZenMaruGothicMedium',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  courseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timesBlock: {
+    flex: 1,
+  },
+  metaBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  modeArrow: {
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  orinThumb: {
+    width: 24,
+    height: 24,
+    resizeMode: 'cover',
+    borderRadius: 12,
   },
 });

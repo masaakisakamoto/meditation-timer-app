@@ -13,13 +13,13 @@ type Props = {
 };
 
 const modeLabel: Record<Mode, string> = {
-  countdown: 'カウントダウン',
-  countup: 'カウントアップ',
+  countdown: '▼ カウントダウン',
+  countup: '▲ カウントアップ',
 };
 
 const options: { mode: Mode; label: string; sample: string }[] = [
-  { mode: 'countup', label: 'カウントアップ', sample: '1, 2, 3… と増える' },
-  { mode: 'countdown', label: 'カウントダウン', sample: '3, 2, 1… と減る' },
+  { mode: 'countup', label: '▲ カウントアップ', sample: '1, 2, 3… と増える' },
+  { mode: 'countdown', label: '▼ カウントダウン', sample: '3, 2, 1… と減る' },
 ];
 
 const TimerModeToggle: FC<Props> = ({ mode, onSelect }) => {
