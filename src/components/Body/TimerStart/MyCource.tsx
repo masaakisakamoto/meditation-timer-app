@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   titleNoItems: {
     marginTop: -20,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   courseItem: {
     flexDirection: 'row',
