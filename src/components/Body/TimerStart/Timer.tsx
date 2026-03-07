@@ -1,5 +1,13 @@
-import React, { FC } from 'react';
-import { SafeAreaView, Pressable, StyleSheet, View, Image, Text } from 'react-native';
+import React, { FC, useEffect, useRef } from 'react';
+import {
+  SafeAreaView,
+  Pressable,
+  StyleSheet,
+  View,
+  Image,
+  Text,
+  Animated,
+} from 'react-native';
 import TimerBackground from '../../../../assets/TimerBackGround.svg';
 import SuttaTrue from '../../../../assets/SuttaTrue.svg';
 import SuttaFalse from '../../../../assets/SuttaFalse.svg';
@@ -19,30 +27,52 @@ const TimerStartDisplay: FC<TimerProps> = ({
   isReading,
   toggleReading,
 }) => {
+  const breathOpacity = useRef(new Animated.Value(1)).current;
+  const breathScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const makeLoop = (value: Animated.Value, toValue: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(value, { toValue, duration: 2200, useNativeDriver: true }),
+          Animated.timing(value, { toValue: 1, duration: 2200, useNativeDriver: true }),
+        ]),
+      );
+    makeLoop(breathOpacity, 0.9).start();
+    makeLoop(breathScale, 0.97).start();
+  }, [breathOpacity, breathScale]);
+
   return (
     <SafeAreaView style={styles.timer}>
-      <TimerBackground width="100%" height="100%" style={styles.timerBackground} />
-
-      {/* スタート／リセット ボタン */}
-      <Pressable style={styles.startButton} onPress={onToggle}>
-        <View style={styles.startCircle} />
-        <Image source={Polygon1} style={styles.startIcon} />
-      </Pressable>
-
-      {/* 経典読み上げ SVG ボタン (SVGにテキスト＋アイコン含む) */}
-      <Pressable
-        style={[styles.readingButton, isReading ? styles.readingOn : styles.readingOff]}
-        onPress={toggleReading}
+      <Animated.View
+        style={[
+          styles.animatedContainer,
+          { opacity: breathOpacity, transform: [{ scale: breathScale }] },
+        ]}
       >
-        {isReading ? (
-          <SuttaTrue width="100%" height="100%" />
-        ) : (
-          <SuttaFalse width="100%" height="100%" />
-        )}
-      </Pressable>
+        <TimerBackground width="100%" height="100%" style={styles.timerBackground} />
 
-      {/* 残り時間 */}
-      <Text style={styles.timeText}>{time}</Text>
+        {/* スタート／リセット ボタン */}
+        <Pressable style={styles.startButton} onPress={onToggle}>
+          <View style={styles.startCircle} />
+          <Image source={Polygon1} style={styles.startIcon} />
+        </Pressable>
+
+        {/* 経典読み上げ SVG ボタン (SVGにテキスト＋アイコン含む) */}
+        <Pressable
+          style={[styles.readingButton, isReading ? styles.readingOn : styles.readingOff]}
+          onPress={toggleReading}
+        >
+          {isReading ? (
+            <SuttaTrue width="100%" height="100%" />
+          ) : (
+            <SuttaFalse width="100%" height="100%" />
+          )}
+        </Pressable>
+
+        {/* 残り時間 */}
+        <Text style={styles.timeText}>{time}</Text>
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -51,6 +81,7 @@ export default TimerStartDisplay;
 
 const styles = StyleSheet.create({
   timer: { width: '75%', height: 280, position: 'relative' },
+  animatedContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   timerBackground: {
     position: 'absolute',
     top: 0,
