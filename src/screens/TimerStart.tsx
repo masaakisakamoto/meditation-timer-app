@@ -74,7 +74,7 @@ export const TimerStart: FC = () => {
         />
 
         {/* ② アラーム時間 */}
-        <AlarmTime times={courseTimes} />
+        <AlarmTime times={courseTimes} mode={mode} ringType={ringType} />
 
         {/* ③ マイコース一覧 */}
         <MyCource

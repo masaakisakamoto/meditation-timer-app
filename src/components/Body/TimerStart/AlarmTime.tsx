@@ -1,25 +1,32 @@
 // src/components/Body/TimerStart/AlarmTime.tsx
 import React, { FC } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { orinList } from '../../../screens/TimerConfig';
 
 type Props = {
   times: number[];
+  mode: string;
+  ringType: string;
 };
 
-const AlarmTime: FC<Props> = ({ times }) => {
-  // always three entries
+const AlarmTime: FC<Props> = ({ times, mode, ringType }) => {
   const display = [times[0] ?? 0, times[1] ?? 0, times[2] ?? 0];
+  const hasAnyTime = display.some((t) => t > 0);
+  const orin = orinList.find((o) => o.id === ringType) ?? orinList[0];
 
   return (
     <View style={styles.wrapper}>
       <Text style={styles.title}>アラーム時間</Text>
       <View style={styles.container}>
-        {display.map((t, i) => (
-          <View key={i} style={styles.timeBox}>
-            <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
-            <Text style={styles.unitText}>分</Text>
+        <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
+          <Text style={styles.timesText}>{display.map((t) => `${t}分`).join('　')}</Text>
+        </View>
+        {hasAnyTime && (
+          <View style={styles.metaBlock}>
+            <Text style={styles.modeArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
+            <Image source={orin.image} style={styles.orinThumb} />
           </View>
-        ))}
+        )}
       </View>
     </View>
   );
@@ -42,26 +49,38 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
-  timeBox: {
+  timesBlock: {
+    flex: 1,
+  },
+  timesBlockCentered: {
+    alignItems: 'center',
+  },
+  timesText: {
+    fontSize: 26,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#000',
+  },
+  metaBlock: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    gap: 6,
   },
-  timeText: {
-    fontSize: 32,
-    fontWeight: '500',
-    fontFamily: 'ZenMaruGothic-Medium',
-    marginRight: 4,
-  },
-  unitText: {
+  modeArrow: {
     fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'ZenMaruGothic-Medium',
-    marginBottom: 4,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  orinThumb: {
+    width: 28,
+    height: 28,
+    resizeMode: 'cover',
+    borderRadius: 14,
   },
 });
