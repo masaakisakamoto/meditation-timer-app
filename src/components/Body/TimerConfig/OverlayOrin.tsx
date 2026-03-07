@@ -1,7 +1,8 @@
 // src/components/Body/TimerConfig/OverlayOrin.tsx
 
 import React, { FC } from 'react';
-import { View, Text, Image, Pressable, StyleSheet, FlatList } from 'react-native';
+import { Text, Image, Pressable, StyleSheet, FlatList } from 'react-native';
+import ModalPanel from '../../common/ModalPanel';
 
 export type Orin = {
   id: string;
@@ -21,82 +22,32 @@ type Props = {
 
 const OverlayOrin: FC<Props> = ({ orins, onSelect, onClose }) => {
   return (
-    <View style={styles.overlayContainer}>
-      <View style={styles.backdrop}>
-        <View style={styles.panel}>
-          {/* ヘッダー部分 */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>おりんを選択</Text>
-            <Pressable onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>×</Text>
-            </Pressable>
-          </View>
-
-          {/* おりんリスト */}
-          <FlatList
-            data={orins}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => onSelect(item)}
-                style={({ pressed }) => [
-                  styles.item,
-                  pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
-                ]}
-              >
-                <Image source={item.image} style={styles.icon} />
-                <Text style={styles.name}>{item.name}</Text>
-              </Pressable>
-            )}
-          />
-        </View>
-      </View>
-    </View>
+    <ModalPanel title="おりんを選択" onClose={onClose}>
+      {/* おりんリスト */}
+      <FlatList
+        data={orins}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => onSelect(item)}
+            style={({ pressed }) => [
+              styles.item,
+              pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+            ]}
+          >
+            <Image source={item.image} style={styles.icon} />
+            <Text style={styles.name}>{item.name}</Text>
+          </Pressable>
+        )}
+      />
+    </ModalPanel>
   );
 };
 
 export default OverlayOrin;
 
 const styles = StyleSheet.create({
-  overlayContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  panel: {
-    width: '100%',
-    maxWidth: 500,
-    maxHeight: '90%',
-    backgroundColor: '#fcdfa5',
-    borderRadius: 20,
-    padding: 20,
-  },
-  header: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#000',
-  },
-  closeButton: {
-    padding: 8,
-  },
-  closeText: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
   list: {
     width: '100%',
   },
