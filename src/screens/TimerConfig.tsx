@@ -248,7 +248,7 @@ export default TimerConfig;
 /* ---------- styles ---------- */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
-  body: { padding: 20, alignItems: 'center' },
+  body: { padding: 20, alignItems: 'center', gap: 12 },
   settingsButton: {
     padding: 6,
   },

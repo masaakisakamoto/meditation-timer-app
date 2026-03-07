@@ -41,7 +41,6 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
     // background の高さ分だけ余白を確保
     height: 200,
     position: 'relative',

@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    marginVertical: 8,
   },
   label: {
     fontSize: 16,
