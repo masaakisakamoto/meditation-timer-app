@@ -2,6 +2,9 @@
 import React, { FC } from 'react';
 import { Text, Image, Pressable, StyleSheet, FlatList } from 'react-native';
 import ModalPanel from '../../ui/ModalPanel';
+import { colors } from '../../../theme/colors';
+import { spacing } from '../../../theme/spacing';
+import { radius } from '../../../theme/radius';
 
 export type Orin = {
   id: string;
@@ -54,15 +57,15 @@ const styles = StyleSheet.create({
     width: 300, // 横幅は固定
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: colors.cardBg,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    marginBottom: spacing.sm,
   },
   icon: {
     width: 50,
     height: 50,
-    marginRight: 12,
+    marginRight: spacing.sm,
     resizeMode: 'cover',
     borderRadius: 25, // 円形にする
   },
@@ -70,6 +73,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     fontFamily: 'ZenMaruGothic-Medium',
-    color: '#000',
+    color: colors.textPrimary,
   },
 });
