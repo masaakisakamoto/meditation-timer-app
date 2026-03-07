@@ -8,10 +8,12 @@ import {
   View,
   Text,
   Switch,
+  Pressable,
 } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { useAudioPlayer } from 'expo-audio';
+import Svg, { Path } from 'react-native-svg';
 import type { AudioPlayer } from 'expo-audio';
 
 import { CourseContext } from '../context/CourseContext';
@@ -27,6 +29,7 @@ import OrinPickerModal, {
   Orin as OrinType,
 } from '../components/feature/timer/OrinPickerModal';
 import ActionButtons from '../components/Body/TimerConfig/SaveButton'; // ← リセット+保存 を 1 つにまとめたもの
+import ModalPanel from '../components/ui/ModalPanel';
 
 /* ---------- props 型 ---------- */
 type TimerConfigProps = { onFinished?: () => void }; // ★コールバックだけ受け取る
@@ -84,6 +87,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
   /* -------- local state -------- */
   const [alarmTimes, setAlarmTimes] = useState<[number, number, number]>([0, 0, 0]);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   /* -------- audio players -------- */
   // 各おりんに対して個別のAudioPlayerを作成
@@ -154,7 +158,22 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
   /* -------- render -------- */
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="タイマー設定" />
+      <Header
+        title="タイマー設定"
+        rightElement={
+          <Pressable
+            onPress={() => setShowSettings(true)}
+            style={({ pressed }) => [styles.settingsButton, pressed && { opacity: 0.6 }]}
+          >
+            <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96a7.26 7.26 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94L2.86 14.52a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"
+                fill="#fff"
+              />
+            </Svg>
+          </Pressable>
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* 円形タイマー＋現在の 3 つの分 */}
@@ -178,15 +197,6 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
           onSelect={(m) => configCtx.setMode(m)}
         />
 
-        {/* 画面スリープ防止 */}
-        <View style={styles.keepAwakeRow}>
-          <Text style={styles.keepAwakeLabel}>タイマー中は画面をスリープさせない</Text>
-          <Switch
-            value={configCtx.config.keepAwakeOn}
-            onValueChange={configCtx.toggleKeepAwake}
-          />
-        </View>
-
         {/* おりん選択 */}
         <OrinButton selected={selectedOrin} onPress={() => setShowOverlay(true)} />
 
@@ -196,6 +206,24 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
           onSave={handleSaveCourse}
         />
       </ScrollView>
+
+      {/* アプリ設定モーダル */}
+      <Modal
+        visible={showSettings}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowSettings(false)}
+      >
+        <ModalPanel title="設定" onClose={() => setShowSettings(false)}>
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>タイマー中は画面をスリープさせない</Text>
+            <Switch
+              value={configCtx.config.keepAwakeOn}
+              onValueChange={configCtx.toggleKeepAwake}
+            />
+          </View>
+        </ModalPanel>
+      </Modal>
 
       {/* おりん一覧モーダル */}
       <Modal
@@ -221,18 +249,19 @@ export default TimerConfig;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { padding: 20, alignItems: 'center' },
-  keepAwakeRow: {
-    width: '90%',
+  settingsButton: {
+    padding: 6,
+  },
+  settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fcdfa5',
-    borderRadius: 15,
+    backgroundColor: '#fff',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 8,
+    paddingVertical: 14,
   },
-  keepAwakeLabel: {
+  settingLabel: {
     fontFamily: 'ZenMaruGothicMedium',
     fontSize: 15,
     color: '#000',

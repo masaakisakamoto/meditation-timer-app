@@ -7,14 +7,16 @@ interface HeaderProps {
   // 任意：親から上書きしたい場合に使える
   titleStyle?: TextStyle;
   hasDivider?: boolean; // 追加
+  rightElement?: React.ReactNode;
 }
 
-const Header: FC<HeaderProps> = ({ title, titleStyle, hasDivider }) => (
+const Header: FC<HeaderProps> = ({ title, titleStyle, hasDivider, rightElement }) => (
   <View>
     <SafeAreaView style={styles.header}>
       <Text style={[styles.title, titleStyle]} numberOfLines={1} ellipsizeMode="tail">
         {title}
       </Text>
+      {rightElement && <View style={styles.rightSlot}>{rightElement}</View>}
     </SafeAreaView>
     {hasDivider && <View style={styles.divider} />}
   </View>
@@ -28,6 +30,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#9fcaec',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  rightSlot: {
+    position: 'absolute',
+    right: 16,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,

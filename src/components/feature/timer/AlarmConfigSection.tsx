@@ -76,7 +76,9 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
                   pressed && { opacity: 0.7 },
                 ]}
               >
-                <Text style={styles.optionLabel}>{min === 0 ? '未設定' : `${min}分`}</Text>
+                <Text style={styles.optionLabel}>
+                  {min === 0 ? '未設定' : `${min}分`}
+                </Text>
                 {currentMinutes === min && <Text style={styles.checkmark}>✓</Text>}
               </Pressable>
             ))}
