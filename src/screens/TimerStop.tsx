@@ -628,7 +628,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       nextIdx > lastHandledSegmentRef.current
     ) {
       lastHandledSegmentRef.current = nextIdx;
-      setNextIdx((prev) => prev + 1);
+      const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
+      const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
+      setNextIdx(resolvedNextIdx);
       if (skipBellOnResumeRef.current) {
         // 復帰直後の1回だけ無音スキップ（バックグラウンド中の区切りを通知済みのため）
         skipBellOnResumeRef.current = false;
