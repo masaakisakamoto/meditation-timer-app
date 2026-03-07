@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fcdfa5',
     borderRadius: 15,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     marginVertical: 8,
   },
   label: {
