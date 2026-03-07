@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timerLabel: {
-    fontSize: 13,
+    fontSize: 20,
     color: '#6b7280',
     textAlign: 'center',
   },
   timerValue: {
-    fontSize: 22,
+    fontSize: 34,
     fontFamily: 'ZenMaruGothicMedium',
     color: '#374151',
     textAlign: 'center',
