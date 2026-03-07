@@ -46,7 +46,7 @@ export const TimerStart: FC = () => {
 
   const handleNavigateToStop = () => {
     if (!courseTimes.length) {
-      Alert.alert('エラー', 'まずマイコースを選択してください');
+      Alert.alert('マイコースを選んでください');
       return;
     }
     navigation.navigate('TimerStop', { courseTimes, mode, ringType });
