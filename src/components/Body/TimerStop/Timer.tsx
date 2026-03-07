@@ -1,6 +1,6 @@
 // src/components/Body/TimerStop/TimerControls.tsx
-import React, { FC } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React, { FC, useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
 import TimerBackgroundB from '../../../../assets/TimerBackGroundB.svg';
 import PauseIcon from '../../../../assets/PauseButton.svg';
 import StopIcon from '../../../../assets/StopButton.svg';
@@ -21,23 +21,45 @@ const TimerControls: FC<TimerControlsProps> = ({
   isPlaying,
   onTogglePause,
   onStop,
-}) => (
-  <View style={styles.container}>
-    <TimerBackgroundB width="100%" height="100%" style={styles.background} />
+}) => {
+  const breathOpacity = useRef(new Animated.Value(1)).current;
+  const breathScale = useRef(new Animated.Value(1)).current;
 
-    <Text style={styles.timeText}>{time}</Text>
+  useEffect(() => {
+    const makeLoop = (value: Animated.Value, toValue: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(value, { toValue, duration: 2200, useNativeDriver: true }),
+          Animated.timing(value, { toValue: 1, duration: 2200, useNativeDriver: true }),
+        ]),
+      );
+    makeLoop(breathOpacity, 0.9).start();
+    makeLoop(breathScale, 0.97).start();
+  }, [breathOpacity, breathScale]);
 
-    <View style={styles.controls}>
-      <Pressable onPress={onTogglePause} style={styles.pauseButton}>
-        <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
-      </Pressable>
+  return (
+    <Animated.View
+      style={[
+        styles.container,
+        { opacity: breathOpacity, transform: [{ scale: breathScale }] },
+      ]}
+    >
+      <TimerBackgroundB width="100%" height="100%" style={styles.background} />
 
-      <Pressable onPress={onStop} style={styles.stopButton}>
-        <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
-      </Pressable>
-    </View>
-  </View>
-);
+      <Text style={styles.timeText}>{time}</Text>
+
+      <View style={styles.controls}>
+        <Pressable onPress={onTogglePause} style={styles.pauseButton}>
+          <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+        </Pressable>
+
+        <Pressable onPress={onStop} style={styles.stopButton}>
+          <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
+        </Pressable>
+      </View>
+    </Animated.View>
+  );
+};
 
 export default TimerControls;
 

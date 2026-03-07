@@ -1,6 +1,6 @@
 // src/components/Body/TimerConfig/Timer.tsx
-import React, { FC } from 'react';
-import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
+import React, { FC, useEffect, useRef } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, Animated } from 'react-native';
 // SVG をコンポーネントとして読み込む
 import TimerBackground from '../../../../assets/TimerBackGround.svg';
 
@@ -12,36 +12,58 @@ interface Props {
 }
 
 const TimerConfigDisplay: FC<Props> = ({ times, topLabel, mainLabel }) => {
+  const breathOpacity = useRef(new Animated.Value(1)).current;
+  const breathScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const makeLoop = (value: Animated.Value, toValue: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(value, { toValue, duration: 2200, useNativeDriver: true }),
+          Animated.timing(value, { toValue: 1, duration: 2200, useNativeDriver: true }),
+        ]),
+      );
+    makeLoop(breathOpacity, 0.9).start();
+    makeLoop(breathScale, 0.97).start();
+  }, [breathOpacity, breathScale]);
+
   return (
     <SafeAreaView style={styles.wrapper}>
-      {/* 背景SVG */}
-      <TimerBackground
-        width="100%"
-        height={styles.background.height}
-        style={styles.background}
-      />
+      <Animated.View
+        style={[
+          styles.animatedContainer,
+          { opacity: breathOpacity, transform: [{ scale: breathScale }] },
+        ]}
+      >
+        {/* 背景SVG */}
+        <TimerBackground
+          width="100%"
+          height={styles.background.height}
+          style={styles.background}
+        />
 
-      {/* 背景の上に見出し＋リストを重ねる */}
-      <View style={styles.content}>
-        {topLabel && mainLabel ? (
-          <View style={styles.centerBlock}>
-            <Text style={styles.timerLabel}>{topLabel}</Text>
-            <Text style={styles.timerValue}>{mainLabel}</Text>
-          </View>
-        ) : (
-          <>
-            <Text style={styles.header}>アラーム時間</Text>
-            <View style={styles.timesList}>
-              {times.map((t, i) => (
-                <View key={i} style={styles.timeItem}>
-                  <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
-                  <Text style={styles.unitText}>分</Text>
-                </View>
-              ))}
+        {/* 背景の上に見出し＋リストを重ねる */}
+        <View style={styles.content}>
+          {topLabel && mainLabel ? (
+            <View style={styles.centerBlock}>
+              <Text style={styles.timerLabel}>{topLabel}</Text>
+              <Text style={styles.timerValue}>{mainLabel}</Text>
             </View>
-          </>
-        )}
-      </View>
+          ) : (
+            <>
+              <Text style={styles.header}>アラーム時間</Text>
+              <View style={styles.timesList}>
+                {times.map((t, i) => (
+                  <View key={i} style={styles.timeItem}>
+                    <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
+                    <Text style={styles.unitText}>分</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -55,6 +77,13 @@ const styles = StyleSheet.create({
     // background の高さ分だけ余白を確保
     height: 200,
     position: 'relative',
+  },
+  animatedContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: 200,
   },
   background: {
     position: 'absolute',
