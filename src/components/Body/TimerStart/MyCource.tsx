@@ -7,13 +7,14 @@ type OrinItem = { id: string; image: number };
 type Props = {
   courses: Course[];
   orins: OrinItem[];
+  selectedId?: string;
   onSelect: (course: Course) => void;
   onDelete: (id: string) => void;
 };
 
 const deleteIcon = require('../../../../assets/DeleteButton.png');
 
-const MyCource: FC<Props> = ({ courses, orins, onSelect, onDelete }) => (
+const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete }) => (
   <View style={styles.container}>
     <Text style={[styles.title, courses.length === 0 && styles.titleNoItems]}>
       マイコース
@@ -29,7 +30,13 @@ const MyCource: FC<Props> = ({ courses, orins, onSelect, onDelete }) => (
       courses.map((course) => (
         <View key={course.id} style={styles.courseItem}>
           {/* 選択ボタン */}
-          <Pressable style={styles.selectButton} onPress={() => onSelect(course)}>
+          <Pressable
+            style={[
+              styles.selectButton,
+              selectedId === course.id && styles.selectButtonSelected,
+            ]}
+            onPress={() => onSelect(course)}
+          >
             <View style={styles.courseRow}>
               <View style={styles.timesBlock}>
                 <Text style={styles.selectText}>
@@ -96,6 +103,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginLeft: 10,
+  },
+  selectButtonSelected: {
+    backgroundColor: '#fff3d0',
+    borderWidth: 2,
+    borderColor: '#d97706',
   },
   selectText: {
     fontSize: 18,

@@ -35,10 +35,12 @@ export const TimerStart: FC = () => {
 
   /*─── ローカル state ───*/
   const [courseTimes, setCourseTimes] = useState<number[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
   /*─── ハンドラ ───*/
   const handleSelectCourse = (course: Course) => {
     setCourseTimes(course.times);
+    setSelectedCourseId(course.id);
     configCtx.setMode((course.mode ?? 'countup') as 'countup' | 'countdown');
     configCtx.setRingType(course.ringType ?? '4');
   };
@@ -48,6 +50,7 @@ export const TimerStart: FC = () => {
     if (courseTimes.length && courses.find((c) => c.id === id)?.times === courseTimes) {
       setCourseTimes([]);
     }
+    if (id === selectedCourseId) setSelectedCourseId('');
   };
 
   const handleNavigateToStop = () => {
@@ -80,6 +83,7 @@ export const TimerStart: FC = () => {
         <MyCource
           courses={courses}
           orins={orinList}
+          selectedId={selectedCourseId}
           onSelect={handleSelectCourse}
           onDelete={handleDeleteCourse}
         />
