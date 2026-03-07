@@ -142,8 +142,6 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 
   // 発火済み区切りインデックスを管理する Set（通知による誤上書きを防ぐ）
   const firedSegmentsRef = useRef(new Set<number>());
-  // 復帰直後の1回だけ鐘を無音スキップするフラグ
-  const skipBellOnResumeRef = useRef(false);
   // バックグラウンド中フラグ: 非 active 遷移でセット、syncFromNowWithoutBell 完了でリセット
   // catch-up より先に bell effect が走っても鐘を抑止するためのガード
   const wasBackgroundedRef = useRef(false);
@@ -534,10 +532,6 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         anyNewlySkipped = true;
       }
     }
-    // 新たにスキップした区切りがあればスキップフラグをセット
-    if (anyNewlySkipped) {
-      skipBellOnResumeRef.current = true;
-    }
     // catch-up 完了: bell effect のガードを解除
     wasBackgroundedRef.current = false;
   }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
@@ -622,12 +616,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
       const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
       setNextIdx(resolvedNextIdx);
-      if (skipBellOnResumeRef.current) {
-        // 復帰直後の1回だけ無音スキップ（バックグラウンド中の区切りを通知済みのため）
-        skipBellOnResumeRef.current = false;
-      } else {
-        playTimerBell(nextIdx);
-      }
+      playTimerBell(nextIdx);
     }
 
     // タイマー終了判定
