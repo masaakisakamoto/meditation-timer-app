@@ -1,9 +1,9 @@
 // src/components/feature/timer/AlarmConfigSection.tsx
 import React, { FC, useState } from 'react';
-import { Pressable, Text, StyleSheet, Modal, View } from 'react-native';
+import { Pressable, Text, StyleSheet, Modal, View, ScrollView } from 'react-native';
 import ModalPanel from '../../ui/ModalPanel';
 
-const MINUTE_OPTIONS = [0, 5, 10, 15, 20, 30, 45, 60];
+const MINUTE_OPTIONS = [0, ...Array.from({ length: 12 }, (_, i) => (i + 1) * 5)];
 
 type Props = {
   times: [number, number, number];
@@ -60,25 +60,27 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
           title={editingIndex !== null ? `アラーム ${editingIndex + 1}` : ''}
           onClose={() => setEditingIndex(null)}
         >
-          {MINUTE_OPTIONS.map((min) => (
-            <Pressable
-              key={min}
-              onPress={() => {
-                if (editingIndex !== null) {
-                  onSetTime(editingIndex, min);
-                  setEditingIndex(null);
-                }
-              }}
-              style={({ pressed }) => [
-                styles.option,
-                currentMinutes === min && styles.optionSelected,
-                pressed && { opacity: 0.7 },
-              ]}
-            >
-              <Text style={styles.optionLabel}>{min === 0 ? '未設定' : `${min}分`}</Text>
-              {currentMinutes === min && <Text style={styles.checkmark}>✓</Text>}
-            </Pressable>
-          ))}
+          <ScrollView>
+            {MINUTE_OPTIONS.map((min) => (
+              <Pressable
+                key={min}
+                onPress={() => {
+                  if (editingIndex !== null) {
+                    onSetTime(editingIndex, min);
+                    setEditingIndex(null);
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.option,
+                  currentMinutes === min && styles.optionSelected,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Text style={styles.optionLabel}>{min === 0 ? '未設定' : `${min}分`}</Text>
+                {currentMinutes === min && <Text style={styles.checkmark}>✓</Text>}
+              </Pressable>
+            ))}
+          </ScrollView>
         </ModalPanel>
       </Modal>
     </>
