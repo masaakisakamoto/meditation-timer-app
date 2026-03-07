@@ -58,12 +58,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     lineHeight: 25,
-    fontFamily: 'ZenMaruGothic-Medium',
+    fontFamily: 'ZenMaruGothicMedium',
     fontWeight: '500',
     textAlign: 'center',
     position: 'absolute',
-    left: '25%', // 左から25%の位置に配置
-    right: '5%', // 右端の余白5%
+    left: '5%', // 左端の余白5%
+    right: '28%', // 右側のサンプル数字分を避ける
     flexShrink: 1, // テキストを縮小可能に
   },
   downText: { color: '#000' },
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: '20%',
     height: '60%',
-    left: '5%',
+    right: '5%',
     top: '20%',
   },
   downInd: {
@@ -91,8 +91,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'GothicA1-Medium',
     fontWeight: '500',
-    left: '8%',
-    top: '30%',
+    right: '8%',
+    top: '50%',
+    transform: [{ translateY: -8 }],
   },
   downSample: {
     color: '#aba686',
