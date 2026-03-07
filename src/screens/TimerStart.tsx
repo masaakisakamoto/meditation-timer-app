@@ -55,7 +55,7 @@ export const TimerStart: FC = () => {
   /*─── 画面 ───*/
   return (
     <SafeAreaView style={styles.safe}>
-      <Header title="Timer" />
+      <Header title="タイマー" />
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* ① 円形タイマー＋読経ボタン */}

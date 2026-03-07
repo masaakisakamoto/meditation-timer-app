@@ -651,7 +651,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   /* ---------- UI ---------- */
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Timer" />
+      <Header title="タイマー" />
       <ScrollView contentContainerStyle={styles.body}>
         <Timer
           time={displayTime}
