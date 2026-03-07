@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   chevron: {
     fontSize: 20,
-    color: '#aaa',
+    color: '#C7C7CC',
     lineHeight: 22,
   },
 });
