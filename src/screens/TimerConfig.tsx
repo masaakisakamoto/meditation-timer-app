@@ -1,6 +1,7 @@
 // src/screens/TimerConfig.tsx
 import React, { FC, useContext, useState, useMemo } from 'react';
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -119,6 +120,10 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
   /* -------- handlers -------- */
   /** マイコースとして保存 */
   const handleSaveCourse = () => {
+    if (alarmTimes[0] === 0) {
+      Alert.alert('アラームを選んでください');
+      return;
+    }
     // マイコースとして保存
     addCourse(alarmTimes);
 
@@ -190,6 +195,10 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
             setAlarmTimes((prev) => {
               const next = [...prev] as [number, number, number];
               next[idx] = min;
+              // 未設定にしたら後続もクリア
+              if (min === 0) {
+                for (let i = idx + 1; i < next.length; i++) next[i] = 0;
+              }
               return next;
             })
           }
@@ -206,7 +215,11 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
 
         {/* リセット＋保存ボタン */}
         <ActionButtons
-          onReset={() => setAlarmTimes([0, 0, 0])}
+          onReset={() => {
+            setAlarmTimes([0, 0, 0]);
+            configCtx.setMode('countup');
+            configCtx.setRingType('4');
+          }}
           onSave={handleSaveCourse}
         />
       </ScrollView>
