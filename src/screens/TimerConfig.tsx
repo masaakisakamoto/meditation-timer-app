@@ -240,6 +240,14 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
               onValueChange={configCtx.toggleKeepAwake}
             />
           </View>
+          <Text style={[styles.settingSection, { marginTop: 16 }]}>経典読み上げ</Text>
+          <View style={styles.settingRow}>
+            <Text style={styles.settingDescription}>
+              {configCtx.config.readingOn
+                ? '経典読み上げON選択中　おりん終了後にタイマー開始'
+                : '経典読み上げOFF選択中　おりん終了後にタイマー開始'}
+            </Text>
+          </View>
         </ModalPanel>
       </Modal>
 
@@ -292,5 +300,10 @@ const styles = StyleSheet.create({
     color: '#000',
     flexShrink: 1,
     marginRight: 12,
+  },
+  settingDescription: {
+    fontFamily: 'ZenMaruGothicMedium',
+    fontSize: 14,
+    color: '#6b7280',
   },
 });

@@ -1,6 +1,15 @@
 // src/screens/TimerStart.tsx
 import React, { FC, useState, useContext } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Alert } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  Modal,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,6 +21,7 @@ import AlarmTime from '../components/Body/TimerStart/AlarmTime';
 import MyCource from '../components/Body/TimerStart/MyCource';
 import Timer from '../components/Body/TimerStart/Timer';
 
+import ModalPanel from '../components/ui/ModalPanel';
 import { CourseContext } from '../context/CourseContext';
 import type { Course } from '../context/CourseContext';
 import { ConfigContext } from '../context/ConfigContext';
@@ -36,6 +46,7 @@ export const TimerStart: FC = () => {
   /*─── ローカル state ───*/
   const [courseTimes, setCourseTimes] = useState<number[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+  const [showHowTo, setShowHowTo] = useState(false);
 
   /*─── ハンドラ ───*/
   const handleSelectCourse = (course: Course) => {
@@ -64,7 +75,17 @@ export const TimerStart: FC = () => {
   /*─── 画面 ───*/
   return (
     <SafeAreaView style={styles.safe}>
-      <Header title="タイマー" />
+      <Header
+        title="タイマー"
+        rightElement={
+          <Pressable
+            onPress={() => setShowHowTo(true)}
+            style={({ pressed }) => [styles.helpButton, pressed && { opacity: 0.6 }]}
+          >
+            <Text style={styles.helpButtonText}>使い方</Text>
+          </Pressable>
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* ① 円形タイマー＋読経ボタン */}
@@ -89,6 +110,25 @@ export const TimerStart: FC = () => {
           onDelete={handleDeleteCourse}
         />
       </ScrollView>
+      <Modal
+        visible={showHowTo}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowHowTo(false)}
+      >
+        <ModalPanel title="タイマー開始の流れ" onClose={() => setShowHowTo(false)}>
+          <View style={styles.howToSection}>
+            <Text style={styles.howToLabel}>経典読み上げ ON</Text>
+            <Text style={styles.howToText}>
+              経典読み上げ → おりん終了後にタイマー開始
+            </Text>
+          </View>
+          <View style={styles.howToSection}>
+            <Text style={styles.howToLabel}>経典読み上げ OFF</Text>
+            <Text style={styles.howToText}>おりん終了後にタイマー開始</Text>
+          </View>
+        </ModalPanel>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -99,4 +139,31 @@ export default TimerStart;
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#e0eef9' },
   body: { paddingVertical: 20, alignItems: 'center' },
+  helpButton: {
+    padding: 6,
+  },
+  helpButtonText: {
+    fontSize: 15,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#fff',
+  },
+  howToSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 12,
+    gap: 6,
+  },
+  howToLabel: {
+    fontSize: 14,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#6b7280',
+  },
+  howToText: {
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#000',
+    lineHeight: 24,
+  },
 });
