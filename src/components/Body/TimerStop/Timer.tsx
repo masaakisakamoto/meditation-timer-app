@@ -24,7 +24,8 @@ const TimerControls: FC<TimerControlsProps> = ({
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
-  const stopOpacity = useRef(new Animated.Value(1)).current;
+  const stopPressScale = useRef(new Animated.Value(1)).current;
+  const stopPressOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const makeLoop = (value: Animated.Value, toValue: number) =>
@@ -39,15 +40,23 @@ const TimerControls: FC<TimerControlsProps> = ({
   }, [breathOpacity, breathScale]);
 
   const handleStop = () => {
-    Animated.timing(stopOpacity, {
-      toValue: 0.94,
-      duration: 220,
-      useNativeDriver: true,
-    }).start(() => onStop());
+    // ボタン押下演出 → onStop
+    Animated.parallel([
+      Animated.timing(stopPressScale, {
+        toValue: 0.96,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(stopPressOpacity, {
+        toValue: 0.75,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => onStop());
   };
 
   return (
-    <Animated.View style={[styles.container, { opacity: stopOpacity }]}>
+    <Animated.View style={styles.container}>
       <Animated.View
         style={[
           styles.fillContainer,
@@ -64,7 +73,14 @@ const TimerControls: FC<TimerControlsProps> = ({
           </Pressable>
 
           <Pressable onPress={handleStop} style={styles.stopButton}>
-            <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
+            <Animated.View
+              style={{
+                transform: [{ scale: stopPressScale }],
+                opacity: stopPressOpacity,
+              }}
+            >
+              <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
+            </Animated.View>
           </Pressable>
         </View>
       </Animated.View>
