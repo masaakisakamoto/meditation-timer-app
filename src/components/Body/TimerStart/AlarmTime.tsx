@@ -19,7 +19,11 @@ const AlarmTime: FC<Props> = ({ times, mode, ringType }) => {
       <Text style={styles.title}>アラーム時間</Text>
       <View style={styles.container}>
         <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
-          <Text style={styles.timesText}>{display.map((t) => `${t}分`).join('　')}</Text>
+          <Text style={styles.timesText}>
+            {display
+              .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
+              .join('　')}
+          </Text>
         </View>
         {hasAnyTime && (
           <View style={styles.metaBlock}>

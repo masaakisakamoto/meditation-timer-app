@@ -3,7 +3,14 @@ import React, { FC, useState } from 'react';
 import { Pressable, Text, StyleSheet, Modal, View, ScrollView } from 'react-native';
 import ModalPanel from '../../ui/ModalPanel';
 
-const MINUTE_OPTIONS = [0, ...Array.from({ length: 12 }, (_, i) => (i + 1) * 5)];
+const PROD_OPTIONS = [0, ...Array.from({ length: 12 }, (_, i) => (i + 1) * 5)];
+const MINUTE_OPTIONS = __DEV__ ? [0, 0.5, 1, ...PROD_OPTIONS.slice(1)] : PROD_OPTIONS;
+
+const formatMin = (min: number): string => {
+  if (min === 0) return '未設定';
+  if (min < 1) return `${Math.round(min * 60)}秒`;
+  return `${min}分`;
+};
 
 type Props = {
   times: [number, number, number];
@@ -32,7 +39,7 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
         >
           <Text style={styles.label}>{`🔔 アラーム ${idx + 1}`}</Text>
           <View style={styles.right}>
-            <Text style={styles.current}>{`${min}分`}</Text>
+            <Text style={styles.current}>{formatMin(min)}</Text>
             <Text style={styles.chevron}>›</Text>
           </View>
         </Pressable>
@@ -76,9 +83,7 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
                   pressed && { opacity: 0.7 },
                 ]}
               >
-                <Text style={styles.optionLabel}>
-                  {min === 0 ? '未設定' : `${min}分`}
-                </Text>
+                <Text style={styles.optionLabel}>{formatMin(min)}</Text>
                 {currentMinutes === min && <Text style={styles.checkmark}>✓</Text>}
               </Pressable>
             ))}
