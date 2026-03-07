@@ -7,9 +7,11 @@ import TimerBackground from '../../../../assets/TimerBackGround.svg';
 interface Props {
   /** アラーム時間を "分" で受け取る */
   times: number[];
+  topLabel?: string;
+  mainLabel?: string;
 }
 
-const TimerConfigDisplay: FC<Props> = ({ times }) => {
+const TimerConfigDisplay: FC<Props> = ({ times, topLabel, mainLabel }) => {
   return (
     <SafeAreaView style={styles.wrapper}>
       {/* 背景SVG */}
@@ -21,15 +23,24 @@ const TimerConfigDisplay: FC<Props> = ({ times }) => {
 
       {/* 背景の上に見出し＋リストを重ねる */}
       <View style={styles.content}>
-        <Text style={styles.header}>アラーム時間</Text>
-        <View style={styles.timesList}>
-          {times.map((t, i) => (
-            <View key={i} style={styles.timeItem}>
-              <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
-              <Text style={styles.unitText}>分</Text>
+        {topLabel && mainLabel ? (
+          <View style={styles.centerBlock}>
+            <Text style={styles.timerLabel}>{topLabel}</Text>
+            <Text style={styles.timerValue}>{mainLabel}</Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.header}>アラーム時間</Text>
+            <View style={styles.timesList}>
+              {times.map((t, i) => (
+                <View key={i} style={styles.timeItem}>
+                  <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
+                  <Text style={styles.unitText}>分</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -55,9 +66,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    bottom: 0,
     width: '100%',
     paddingTop: 16,
     alignItems: 'center',
+  },
+  centerBlock: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timerLabel: {
+    fontSize: 13,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  timerValue: {
+    fontSize: 22,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#374151',
+    textAlign: 'center',
   },
   header: {
     fontSize: 18,

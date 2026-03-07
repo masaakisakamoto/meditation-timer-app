@@ -176,8 +176,12 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       />
 
       <ScrollView contentContainerStyle={styles.body}>
-        {/* 円形タイマー＋現在の 3 つの分 */}
-        <Timer times={alarmTimes} />
+        {/* 円形タイマー＋コース合計時間 */}
+        <Timer
+          times={alarmTimes}
+          topLabel="瞑想時間"
+          mainLabel={`${alarmTimes.reduce((s, m) => s + m, 0)}分`}
+        />
 
         {/* アラーム設定 */}
         <AlarmConfigSection
