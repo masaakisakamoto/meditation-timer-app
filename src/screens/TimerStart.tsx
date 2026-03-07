@@ -47,10 +47,10 @@ export const TimerStart: FC = () => {
 
   const handleDeleteCourse = (id: string) => {
     deleteCourse(id);
-    if (courseTimes.length && courses.find((c) => c.id === id)?.times === courseTimes) {
+    if (id === selectedCourseId) {
       setCourseTimes([]);
+      setSelectedCourseId('');
     }
-    if (id === selectedCourseId) setSelectedCourseId('');
   };
 
   const handleNavigateToStop = () => {
