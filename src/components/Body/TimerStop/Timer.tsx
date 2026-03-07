@@ -24,6 +24,7 @@ const TimerControls: FC<TimerControlsProps> = ({
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
+  const stopOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const makeLoop = (value: Animated.Value, toValue: number) =>
@@ -37,26 +38,36 @@ const TimerControls: FC<TimerControlsProps> = ({
     makeLoop(breathScale, 0.97).start();
   }, [breathOpacity, breathScale]);
 
+  const handleStop = () => {
+    Animated.timing(stopOpacity, {
+      toValue: 0.94,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => onStop());
+  };
+
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        { opacity: breathOpacity, transform: [{ scale: breathScale }] },
-      ]}
-    >
-      <TimerBackgroundB width="100%" height="100%" style={styles.background} />
+    <Animated.View style={[styles.container, { opacity: stopOpacity }]}>
+      <Animated.View
+        style={[
+          styles.fillContainer,
+          { opacity: breathOpacity, transform: [{ scale: breathScale }] },
+        ]}
+      >
+        <TimerBackgroundB width="100%" height="100%" style={styles.background} />
 
-      <Text style={styles.timeText}>{time}</Text>
+        <Text style={styles.timeText}>{time}</Text>
 
-      <View style={styles.controls}>
-        <Pressable onPress={onTogglePause} style={styles.pauseButton}>
-          <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
-        </Pressable>
+        <View style={styles.controls}>
+          <Pressable onPress={onTogglePause} style={styles.pauseButton}>
+            <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+          </Pressable>
 
-        <Pressable onPress={onStop} style={styles.stopButton}>
-          <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
-        </Pressable>
-      </View>
+          <Pressable onPress={handleStop} style={styles.stopButton}>
+            <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
+          </Pressable>
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 };
@@ -71,6 +82,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 30,
+  },
+  fillContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   background: {
     position: 'absolute',
