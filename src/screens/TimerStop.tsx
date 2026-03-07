@@ -129,7 +129,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   }, [isPlaying]);
 
   useEffect(() => {
-    lastHandledSegmentRef.current = -1;
+    firedSegmentsRef.current = new Set<number>();
     if (isPlaying) {
       setNextIdx(0);
     }
@@ -140,9 +140,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  // バックグラウンド中に経過した区切りをスキップするための管理 ref
-  // -1 = 未処理, n = インデックス n の区切りまで処理済み（再生またはスキップ）
-  const lastHandledSegmentRef = useRef(-1);
+  // 発火済み区切りインデックスを管理する Set（通知による誤上書きを防ぐ）
+  const firedSegmentsRef = useRef(new Set<number>());
   // 復帰直後の1回だけ鐘を無音スキップするフラグ
   const skipBellOnResumeRef = useRef(false);
   // バックグラウンド中フラグ: 非 active 遷移でセット、syncFromNowWithoutBell 完了でリセット
@@ -527,12 +526,18 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
     setNextIdx(resolvedNextIdx);
 
-    // バックグラウンド中に区切りをまたいでいた場合はスキップフラグをセット
-    if (resolvedNextIdx - 1 > lastHandledSegmentRef.current) {
+    // バックグラウンド中に経過した区切りをスキップ済みとしてマーク（catch-up 鳴動防止）
+    let anyNewlySkipped = false;
+    for (let i = 0; i < resolvedNextIdx; i++) {
+      if (!firedSegmentsRef.current.has(i)) {
+        firedSegmentsRef.current.add(i);
+        anyNewlySkipped = true;
+      }
+    }
+    // 新たにスキップした区切りがあればスキップフラグをセット
+    if (anyNewlySkipped) {
       skipBellOnResumeRef.current = true;
     }
-    // バックグラウンド中に経過した区切りをスキップ済みとしてマーク（catch-up 鳴動防止）
-    lastHandledSegmentRef.current = resolvedNextIdx - 1;
     // catch-up 完了: bell effect のガードを解除
     wasBackgroundedRef.current = false;
   }, [computeSecFromNow, mode, totalSec, cumulativeSecs]);
@@ -557,26 +562,16 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     }, [syncFromNowWithoutBell]),
   );
 
-  // フォアグラウンドで通知を受信した瞬間に区切りをスキップ済みとしてマーク
-  // （バックグラウンド通知後の復帰時など、AppState と別経路で届く場合の二重鳴動防止）
-  useEffect(() => {
-    const sub = Notifications.addNotificationReceivedListener((notification) => {
-      const data = notification.request.content.data as Record<string, unknown>;
-      const rawIndex = data?.segmentIndex;
-      if (typeof rawIndex === 'number' && rawIndex >= 0) {
-        lastHandledSegmentRef.current = Math.max(lastHandledSegmentRef.current, rawIndex);
-      }
-    });
-    return () => sub.remove();
-  }, []);
-
-  // 通知タップでアプリ復帰した場合にも区切りをスキップ済みとしてマーク
+  // 通知タップでアプリ復帰した場合: タップされた区切りまでを発火済みとしてマーク
+  // （syncFromNowWithoutBell も走るが、こちらで先に Set に入れておく）
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data as Record<string, unknown>;
       const rawIndex = data?.segmentIndex;
       if (typeof rawIndex === 'number' && rawIndex >= 0) {
-        lastHandledSegmentRef.current = Math.max(lastHandledSegmentRef.current, rawIndex);
+        for (let i = 0; i <= rawIndex; i++) {
+          firedSegmentsRef.current.add(i);
+        }
       }
     });
     return () => sub.remove();
@@ -621,13 +616,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     if (wasBackgroundedRef.current) return;
     const elapsedSec = mode === 'countup' ? sec : totalSec - sec;
 
-    // 次のおりんのタイミングに達したかチェック
-    // lastHandledSegmentRef より大きいインデックスの場合のみ鳴らす（バックグラウンド復帰後の二重鳴動防止）
-    if (
-      elapsedSec >= cumulativeSecs[nextIdx] &&
-      nextIdx > lastHandledSegmentRef.current
-    ) {
-      lastHandledSegmentRef.current = nextIdx;
+    // 次のおりんのタイミングに達したかチェック（未発火インデックスのみ鳴らす）
+    if (elapsedSec >= cumulativeSecs[nextIdx] && !firedSegmentsRef.current.has(nextIdx)) {
+      firedSegmentsRef.current.add(nextIdx);
       const nextIndex = cumulativeSecs.findIndex((t) => t > elapsedSec);
       const resolvedNextIdx = nextIndex === -1 ? cumulativeSecs.length : nextIndex;
       setNextIdx(resolvedNextIdx);
