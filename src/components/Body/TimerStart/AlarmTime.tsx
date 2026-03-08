@@ -7,9 +7,10 @@ type Props = {
   times: number[];
   mode: string;
   ringType: string;
+  showSelectCourseMessage?: boolean;
 };
 
-const AlarmTime: FC<Props> = ({ times, mode, ringType }) => {
+const AlarmTime: FC<Props> = ({ times, mode, ringType, showSelectCourseMessage }) => {
   const display = [times[0] ?? 0, times[1] ?? 0, times[2] ?? 0];
   const hasAnyTime = display.some((t) => t > 0);
   const orin = orinList.find((o) => o.id === ringType) ?? orinList[0];
@@ -18,18 +19,24 @@ const AlarmTime: FC<Props> = ({ times, mode, ringType }) => {
     <View style={styles.wrapper}>
       <Text style={styles.title}>アラーム時間</Text>
       <View style={styles.container}>
-        <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
-          <Text style={styles.timesText}>
-            {display
-              .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
-              .join('　')}
-          </Text>
-        </View>
-        {hasAnyTime && (
-          <View style={styles.metaBlock}>
-            <Text style={styles.modeArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
-            <Image source={orin.image} style={styles.orinThumb} />
-          </View>
+        {showSelectCourseMessage ? (
+          <Text style={styles.guidanceText}>マイコースを選択してください</Text>
+        ) : (
+          <>
+            <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
+              <Text style={styles.timesText}>
+                {display
+                  .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
+                  .join('　')}
+              </Text>
+            </View>
+            {hasAnyTime && (
+              <View style={styles.metaBlock}>
+                <Text style={styles.modeArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
+                <Image source={orin.image} style={styles.orinThumb} />
+              </View>
+            )}
+          </>
         )}
       </View>
     </View>
@@ -70,6 +77,13 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#000',
+  },
+  guidanceText: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#6b7280',
+    textAlign: 'center',
   },
   metaBlock: {
     flexDirection: 'row',
