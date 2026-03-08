@@ -185,7 +185,15 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         <Timer
           times={alarmTimes}
           topLabel="瞑想時間"
-          mainLabel={`${alarmTimes.reduce((s, m) => s + m, 0)}分`}
+          mainLabel={(() => {
+            const total = alarmTimes.reduce((s, m) => s + m, 0);
+            if (total === 0) return '0分';
+            const secs = Math.round(total * 60);
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            if (m === 0) return `${s}秒`;
+            return s > 0 ? `${m}分${s}秒` : `${m}分`;
+          })()}
         />
 
         {/* アラーム設定 */}

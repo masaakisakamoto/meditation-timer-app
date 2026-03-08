@@ -40,7 +40,9 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
             <View style={styles.courseRow}>
               <View style={styles.timesBlock}>
                 <Text style={styles.selectText}>
-                  {course.times.map((t) => `${t}分`).join('　')}
+                  {course.times
+                    .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
+                    .join('　')}
                 </Text>
               </View>
               <View style={styles.metaBlock}>

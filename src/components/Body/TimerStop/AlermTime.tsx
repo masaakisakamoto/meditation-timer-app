@@ -17,8 +17,10 @@ const AlermTime: FC<Props> = ({ times }) => {
       <View style={styles.row}>
         {times.map((t, i) => (
           <View key={i} style={styles.item}>
-            <Text style={styles.value}>{String(t).padStart(2, '0')}</Text>
-            <Text style={styles.unit}>分</Text>
+            <Text style={styles.value}>
+              {t > 0 && t < 1 ? String(Math.round(t * 60)) : String(t).padStart(2, '0')}
+            </Text>
+            <Text style={styles.unit}>{t > 0 && t < 1 ? '秒' : '分'}</Text>
           </View>
         ))}
       </View>

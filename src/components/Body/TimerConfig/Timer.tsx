@@ -55,8 +55,12 @@ const TimerConfigDisplay: FC<Props> = ({ times, topLabel, mainLabel }) => {
               <View style={styles.timesList}>
                 {times.map((t, i) => (
                   <View key={i} style={styles.timeItem}>
-                    <Text style={styles.timeText}>{String(t).padStart(2, '0')}</Text>
-                    <Text style={styles.unitText}>分</Text>
+                    <Text style={styles.timeText}>
+                      {t > 0 && t < 1
+                        ? String(Math.round(t * 60))
+                        : String(t).padStart(2, '0')}
+                    </Text>
+                    <Text style={styles.unitText}>{t > 0 && t < 1 ? '秒' : '分'}</Text>
                   </View>
                 ))}
               </View>
