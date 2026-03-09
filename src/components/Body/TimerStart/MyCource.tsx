@@ -2,6 +2,7 @@
 import React, { FC } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import type { Course } from '../../../context/CourseContext';
+import { MEDITATION_EMOJI } from '../../../types/meditation';
 
 type OrinItem = { id: string; image: number };
 type Props = {
@@ -41,7 +42,13 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
               <View style={styles.timesBlock}>
                 <Text style={styles.selectText}>
                   {course.times
-                    .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
+                    .map((t, i) => {
+                      const emoji =
+                        MEDITATION_EMOJI[course.meditationTypes?.[i] ?? 'none'];
+                      const timeStr =
+                        t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`;
+                      return emoji ? `${emoji}${timeStr}` : timeStr;
+                    })
                     .join('　')}
                 </Text>
               </View>

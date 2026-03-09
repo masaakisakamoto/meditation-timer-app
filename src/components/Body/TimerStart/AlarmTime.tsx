@@ -2,15 +2,24 @@
 import React, { FC } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { orinList } from '../../../screens/TimerConfig';
+import type { MeditationType } from '../../../types/meditation';
+import { MEDITATION_EMOJI } from '../../../types/meditation';
 
 type Props = {
   times: number[];
   mode: string;
   ringType: string;
   showSelectCourseMessage?: boolean;
+  meditationTypes?: MeditationType[];
 };
 
-const AlarmTime: FC<Props> = ({ times, mode, ringType, showSelectCourseMessage }) => {
+const AlarmTime: FC<Props> = ({
+  times,
+  mode,
+  ringType,
+  showSelectCourseMessage,
+  meditationTypes,
+}) => {
   const display = [times[0] ?? 0, times[1] ?? 0, times[2] ?? 0];
   const hasAnyTime = display.some((t) => t > 0);
   const orin = orinList.find((o) => o.id === ringType) ?? orinList[0];
@@ -26,7 +35,11 @@ const AlarmTime: FC<Props> = ({ times, mode, ringType, showSelectCourseMessage }
             <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
               <Text style={styles.timesText}>
                 {display
-                  .map((t) => (t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`))
+                  .map((t, i) => {
+                    const emoji = MEDITATION_EMOJI[meditationTypes?.[i] ?? 'none'];
+                    const timeStr = t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`;
+                    return emoji ? `${emoji} ${timeStr}` : timeStr;
+                  })
                   .join('　')}
               </Text>
             </View>

@@ -34,12 +34,15 @@ export type RootTabParamList = {
   TimerSutta: undefined;
 };
 
+import type { MeditationType } from './src/types/meditation';
+
 export type RootStackParamList = {
   MainTabs: undefined;
   TimerStop: {
     courseTimes: number[];
     mode: 'countdown' | 'countup';
     ringType: string;
+    meditationTypes?: MeditationType[];
   };
 };
 

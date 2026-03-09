@@ -25,6 +25,7 @@ import ModalPanel from '../components/ui/ModalPanel';
 import { CourseContext } from '../context/CourseContext';
 import type { Course } from '../context/CourseContext';
 import { ConfigContext } from '../context/ConfigContext';
+import type { MeditationType } from '../types/meditation';
 import { orinList } from './TimerConfig';
 
 /* --- 型 --- */
@@ -45,12 +46,16 @@ export const TimerStart: FC = () => {
 
   /*─── ローカル state ───*/
   const [courseTimes, setCourseTimes] = useState<number[]>([]);
+  const [courseMeditationTypes, setCourseMeditationTypes] = useState<MeditationType[]>(
+    [],
+  );
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [showHowTo, setShowHowTo] = useState(false);
 
   /*─── ハンドラ ───*/
   const handleSelectCourse = (course: Course) => {
     setCourseTimes(course.times);
+    setCourseMeditationTypes(course.meditationTypes ?? []);
     setSelectedCourseId(course.id);
     configCtx.setMode((course.mode ?? 'countup') as 'countup' | 'countdown');
     configCtx.setRingType(course.ringType ?? '4');
@@ -60,6 +65,7 @@ export const TimerStart: FC = () => {
     deleteCourse(id);
     if (id === selectedCourseId) {
       setCourseTimes([]);
+      setCourseMeditationTypes([]);
       setSelectedCourseId('');
     }
   };
@@ -69,7 +75,12 @@ export const TimerStart: FC = () => {
       Alert.alert('マイコースを選んでください');
       return;
     }
-    navigation.navigate('TimerStop', { courseTimes, mode, ringType });
+    navigation.navigate('TimerStop', {
+      courseTimes,
+      mode,
+      ringType,
+      meditationTypes: courseMeditationTypes,
+    });
   };
 
   /*─── 画面 ───*/
@@ -103,6 +114,7 @@ export const TimerStart: FC = () => {
           times={courseTimes}
           mode={mode}
           ringType={ringType}
+          meditationTypes={courseMeditationTypes}
           showSelectCourseMessage={courses.length > 0 && !courseTimes.some((t) => t > 0)}
         />
 

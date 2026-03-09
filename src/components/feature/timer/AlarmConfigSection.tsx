@@ -2,6 +2,8 @@
 import React, { FC, useState } from 'react';
 import { Pressable, Text, StyleSheet, Modal, View, ScrollView } from 'react-native';
 import ModalPanel from '../../ui/ModalPanel';
+import type { MeditationType } from '../../../types/meditation';
+import { MEDITATION_EMOJI } from '../../../types/meditation';
 
 const PROD_OPTIONS = [0, ...Array.from({ length: 12 }, (_, i) => (i + 1) * 5)];
 const MINUTE_OPTIONS = __DEV__
@@ -14,12 +16,26 @@ const formatMin = (min: number): string => {
   return `${min}分`;
 };
 
+const TYPE_OPTIONS: { type: MeditationType; label: string }[] = [
+  { type: 'none', label: '−' },
+  { type: 'sitting', label: '🧘' },
+  { type: 'walking', label: '🚶' },
+  { type: 'standing', label: '🧍' },
+];
+
 type Props = {
   times: [number, number, number];
   onSetTime: (index: number, minutes: number) => void;
+  meditationTypes: [MeditationType, MeditationType, MeditationType];
+  onSetType: (index: number, type: MeditationType) => void;
 };
 
-const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
+const AlarmConfigSection: FC<Props> = ({
+  times,
+  onSetTime,
+  meditationTypes,
+  onSetType,
+}) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const currentMinutes = editingIndex !== null ? times[editingIndex] : 0;
@@ -30,22 +46,39 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
 
   return (
     <>
-      {times.slice(0, displayCount).map((min, idx) => (
-        <Pressable
-          key={idx}
-          onPress={() => setEditingIndex(idx)}
-          style={({ pressed }) => [
-            styles.cell,
-            pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
-          ]}
-        >
-          <Text style={styles.label}>{`🔔 アラーム ${idx + 1}`}</Text>
-          <View style={styles.right}>
-            <Text style={styles.current}>{formatMin(min)}</Text>
-            <Text style={styles.chevron}>›</Text>
+      {times.slice(0, displayCount).map((min, idx) => {
+        const mt = meditationTypes[idx];
+        const emoji = MEDITATION_EMOJI[mt];
+        return (
+          <View key={idx} style={styles.alarmGroup}>
+            <Pressable
+              onPress={() => setEditingIndex(idx)}
+              style={({ pressed }) => [
+                styles.cell,
+                styles.cellFull,
+                pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <Text style={styles.label}>{`${emoji || '🔔'} アラーム ${idx + 1}`}</Text>
+              <View style={styles.right}>
+                <Text style={styles.current}>{formatMin(min)}</Text>
+                <Text style={styles.chevron}>›</Text>
+              </View>
+            </Pressable>
+            <View style={styles.typeRow}>
+              {TYPE_OPTIONS.map(({ type, label }) => (
+                <Pressable
+                  key={type}
+                  onPress={() => onSetType(idx, type)}
+                  style={[styles.typeBtn, mt === type && styles.typeBtnActive]}
+                >
+                  <Text style={styles.typeBtnText}>{label}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
-        </Pressable>
-      ))}
+        );
+      })}
 
       {displayCount < times.length && (
         <Pressable
@@ -99,6 +132,10 @@ const AlarmConfigSection: FC<Props> = ({ times, onSetTime }) => {
 export default AlarmConfigSection;
 
 const styles = StyleSheet.create({
+  alarmGroup: {
+    width: '90%',
+    gap: 6,
+  },
   cell: {
     width: '90%',
     flexDirection: 'row',
@@ -108,6 +145,29 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 16,
     paddingVertical: 16,
+  },
+  cellFull: {
+    width: '100%',
+  },
+  typeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 4,
+  },
+  typeBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#fff3d0',
+  },
+  typeBtnActive: {
+    backgroundColor: '#fcdfa5',
+    borderWidth: 2,
+    borderColor: '#d97706',
+  },
+  typeBtnText: {
+    fontSize: 20,
   },
   label: {
     fontSize: 16,
