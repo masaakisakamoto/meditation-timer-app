@@ -8,7 +8,15 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, AppState } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  AppState,
+  View,
+  Text,
+  Pressable,
+} from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
@@ -110,6 +118,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const [nextIdx, setNextIdx] = useState(0);
   // 開始前シーケンス（経典/おりん再生）中のフラグ
   const [isPreparingSequence, setIsPreparingSequence] = useState(false);
+  // タイマーが自然終了したフラグ（手動停止とは区別）
+  const [isFinished, setIsFinished] = useState(false);
 
   // ✅ 再生開始した瞬間に「開始時刻」を確定
   useEffect(() => {
@@ -622,8 +632,20 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     // タイマー終了判定
     if ((mode === 'countup' && sec >= totalSec) || (mode === 'countdown' && sec <= 0)) {
       setPlaying(false);
+      setIsFinished(true);
     }
   }, [sec, mode, totalSec, cumulativeSecs, nextIdx, isPlaying, playTimerBell]);
+
+/* ---------- フェーズ表示用 ---------- */
+const currentPhaseIdx = Math.min(nextIdx, Math.max(0, meditationTypes.length - 1));
+
+const formatTotal = (secs: number): string => {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}秒`;
+  if (s === 0) return `${m}分`;
+  return `${m}分${s}秒`;
+};
 
   /* ---------- 表示文字列 ---------- */
   const displayTime = new Date(sec * 1000).toISOString().substring(11, 19);
@@ -650,6 +672,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header title="タイマー" />
       <ScrollView contentContainerStyle={styles.body}>
+      {meditationTypes.length > 1 && (
+  <PhaseProgressBar total={meditationTypes.length} currentIdx={nextIdx} />
+)}
         <Timer
           time={displayTime}
           isPlaying={isPlaying}
@@ -671,10 +696,24 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
             }, 100);
           }}
         />
-        <AlermTime
-          times={[courseTimes[0] ?? 0, courseTimes[1] ?? 0, courseTimes[2] ?? 0]}
-        />
+        <CurrentMeditationCard
+  meditationTypes={meditationTypes}
+  currentIdx={currentPhaseIdx}
+/>
       </ScrollView>
+      {isFinished && (
+        <View style={styles.finishOverlay}>
+          <Text style={styles.finishEmoji}>🧘</Text>
+          <Text style={styles.finishTitle}>瞑想完了</Text>
+          <Text style={styles.finishTotal}>合計 {formatTotal(totalSec)}</Text>
+          <Pressable
+            style={({ pressed }) => [styles.finishButton, pressed && { opacity: 0.7 }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.finishButtonText}>戻る</Text>
+          </Pressable>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -682,6 +721,38 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { paddingVertical: 20, alignItems: 'center' },
+  finishOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#e0eef9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  finishEmoji: {
+    fontSize: 80,
+  },
+  finishTitle: {
+    fontSize: 32,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#374151',
+  },
+  finishTotal: {
+    fontSize: 20,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#6b7280',
+  },
+  finishButton: {
+    marginTop: 16,
+    backgroundColor: '#4a90d9',
+    borderRadius: 24,
+    paddingHorizontal: 40,
+    paddingVertical: 14,
+  },
+  finishButtonText: {
+    fontSize: 18,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#fff',
+  },
 });
 
 export default TimerStop;
