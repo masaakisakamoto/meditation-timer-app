@@ -521,7 +521,6 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       setSec(mode === 'countdown' ? 0 : totalSec);
       setNextIdx(cumulativeSecs.length);
       setPlaying(false);
-      setIsFinished(true);
       return;
     }
 
@@ -694,6 +693,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         <CurrentMeditationCard
           meditationTypes={meditationTypes}
           currentIdx={currentPhaseIdx}
+          courseTimes={courseTimes}
         />
       </ScrollView>
     </SafeAreaView>
