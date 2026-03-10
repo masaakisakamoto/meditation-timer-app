@@ -19,6 +19,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Header from '../components/Header/Header';
 import AlermTime from '../components/Body/TimerStop/AlermTime';
 import Timer from '../components/Body/TimerStop/Timer';
+import PhaseProgressBar from '../components/feature/timer/PhaseProgressBar';
+import CurrentMeditationCard from '../components/feature/timer/CurrentMeditationCard';
+import type { MeditationType } from '../types/meditation';
 import { RootStackParamList } from '../../App';
 import { ConfigContext } from '../context/ConfigContext';
 import { orinList } from './TimerConfig';
@@ -53,7 +56,8 @@ const playBell = async (player: AudioPlayer) => {
 };
 
 export const TimerStop: FC<Props> = ({ route, navigation }) => {
-  const { courseTimes } = route.params;
+  const { courseTimes, meditationTypes: paramMeditationTypes } = route.params;
+  const meditationTypes = paramMeditationTypes ?? ([] as MeditationType[]);
   const { config } = useContext(ConfigContext)!;
   const { mode, ringType, readingOn, keepAwakeOn } = config;
 
@@ -510,6 +514,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       setSec(mode === 'countdown' ? 0 : totalSec);
       setNextIdx(cumulativeSecs.length);
       setPlaying(false);
+      setIsFinished(true);
       return;
     }
 
@@ -625,6 +630,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     }
   }, [sec, mode, totalSec, cumulativeSecs, nextIdx, isPlaying, playTimerBell]);
 
+  /* ---------- フェーズ表示用 ---------- */
+  const currentPhaseIdx = Math.min(nextIdx, Math.max(0, meditationTypes.length - 1));
+
   /* ---------- 表示文字列 ---------- */
   const displayTime = new Date(sec * 1000).toISOString().substring(11, 19);
 
@@ -650,6 +658,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header title="タイマー" />
       <ScrollView contentContainerStyle={styles.body}>
+        {meditationTypes.length > 1 && (
+          <PhaseProgressBar total={meditationTypes.length} currentIdx={nextIdx} />
+        )}
         <Timer
           time={displayTime}
           isPlaying={isPlaying}
@@ -671,8 +682,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
             }, 100);
           }}
         />
-        <AlermTime
-          times={[courseTimes[0] ?? 0, courseTimes[1] ?? 0, courseTimes[2] ?? 0]}
+        <CurrentMeditationCard
+          meditationTypes={meditationTypes}
+          currentIdx={currentPhaseIdx}
         />
       </ScrollView>
     </SafeAreaView>

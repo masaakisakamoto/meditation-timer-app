@@ -1,17 +1,24 @@
 // src/context/CourseContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { MeditationType } from '../types/meditation';
 
 export type Course = {
   id: string;
   times: number[];
   mode?: string;
   ringType?: string;
+  meditationTypes?: MeditationType[];
 };
 
 type CourseContextType = {
   courses: Course[];
-  addCourse: (times: number[], mode: string, ringType: string) => void;
+  addCourse: (
+    times: number[],
+    mode: string,
+    ringType: string,
+    meditationTypes?: MeditationType[],
+  ) => void;
   deleteCourse: (id: string) => void;
 };
 
@@ -34,9 +41,14 @@ export const CourseProvider = ({ children }: { children: ReactNode }) => {
   }, [courses]);
 
   /* 追加／削除 Helper */
-  const addCourse = (times: number[], mode: string, ringType: string) => {
+  const addCourse = (
+    times: number[],
+    mode: string,
+    ringType: string,
+    meditationTypes?: MeditationType[],
+  ) => {
     const id = `c${Date.now()}`;
-    setCourses((prev) => [...prev, { id, times, mode, ringType }]);
+    setCourses((prev) => [...prev, { id, times, mode, ringType, meditationTypes }]);
   };
   const deleteCourse = (id: string) => {
     setCourses((prev) => prev.filter((c) => c.id !== id));

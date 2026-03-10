@@ -19,6 +19,7 @@ import type { AudioPlayer } from 'expo-audio';
 
 import { CourseContext } from '../context/CourseContext';
 import { ConfigContext } from '../context/ConfigContext';
+import type { MeditationType } from '../types/meditation';
 import { RootStackParamList } from '../../App';
 
 import Header from '../components/Header/Header';
@@ -87,6 +88,9 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
 
   /* -------- local state -------- */
   const [alarmTimes, setAlarmTimes] = useState<[number, number, number]>([0, 0, 0]);
+  const [meditationTypes, setMeditationTypes] = useState<
+    [MeditationType, MeditationType, MeditationType]
+  >(['none', 'none', 'none']);
   const [showOverlay, setShowOverlay] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -124,18 +128,38 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
       Alert.alert('アラームを選んでください');
       return;
     }
-    // マイコースとして保存
-    addCourse(alarmTimes, configCtx.config.mode, configCtx.config.ringType);
-
-    // TimerStart画面に戻る
+    addCourse(
+      alarmTimes,
+      configCtx.config.mode,
+      configCtx.config.ringType,
+      meditationTypes,
+    );
     onFinished?.();
-
-    // 保存完了のログ出力
     console.log('Course saved:', {
       times: alarmTimes,
       mode: configCtx.config.mode,
       ringType: configCtx.config.ringType,
+      meditationTypes,
     });
+  };
+
+  /** アラーム時間を設定（0にしたら後続タイプもリセット） */
+  const handleSetTime = (idx: number, min: number) => {
+    setAlarmTimes((prev) => {
+      const next = [...prev] as [number, number, number];
+      next[idx] = min;
+      if (min === 0) {
+        for (let i = idx + 1; i < next.length; i++) next[i] = 0;
+      }
+      return next;
+    });
+    if (min === 0) {
+      setMeditationTypes((prev) => {
+        const t = [...prev] as [MeditationType, MeditationType, MeditationType];
+        for (let i = idx; i < t.length; i++) t[i] = 'none';
+        return t;
+      });
+    }
   };
 
   /** おりん選択時の処理 */
@@ -199,15 +223,13 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         {/* アラーム設定 */}
         <AlarmConfigSection
           times={alarmTimes}
-          onSetTime={(idx, min) =>
-            setAlarmTimes((prev) => {
-              const next = [...prev] as [number, number, number];
-              next[idx] = min;
-              // 未設定にしたら後続もクリア
-              if (min === 0) {
-                for (let i = idx + 1; i < next.length; i++) next[i] = 0;
-              }
-              return next;
+          onSetTime={handleSetTime}
+          meditationTypes={meditationTypes}
+          onSetType={(idx, type) =>
+            setMeditationTypes((prev) => {
+              const t = [...prev] as [MeditationType, MeditationType, MeditationType];
+              t[idx] = type;
+              return t;
             })
           }
         />
@@ -225,6 +247,7 @@ export const TimerConfig: FC<TimerConfigProps> = ({ onFinished }) => {
         <ActionButtons
           onReset={() => {
             setAlarmTimes([0, 0, 0]);
+            setMeditationTypes(['none', 'none', 'none']);
             configCtx.setMode('countup');
             configCtx.setRingType('4');
           }}
