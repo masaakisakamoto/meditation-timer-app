@@ -8,7 +8,16 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, AppState, Image } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  AppState,
+  View,
+  Text,
+  Pressable,
+  Image,
+} from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
