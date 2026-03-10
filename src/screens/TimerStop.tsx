@@ -690,15 +690,15 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
             }, 100);
           }}
         />
-        <CurrentMeditationCard
-          meditationTypes={meditationTypes}
-          currentIdx={currentPhaseIdx}
-        />
         {/* mode▲/▼ + おりん補助行 */}
         <View style={styles.subtleRow}>
           <Text style={styles.subtleMeta}>{mode === 'countup' ? '▲' : '▼'}</Text>
           <Image source={selectedOrin.image} style={styles.subtleOrin} />
         </View>
+        <CurrentMeditationCard
+          meditationTypes={meditationTypes}
+          currentIdx={currentPhaseIdx}
+        />
       </ScrollView>
     </SafeAreaView>
   );
