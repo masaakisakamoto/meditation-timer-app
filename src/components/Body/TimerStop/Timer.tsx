@@ -20,6 +20,10 @@ export type TimerControlsProps = {
 
 // Pick sizes that fit well
 const ICON_SIZE_PAUSE = 100;
+
+// 再生ボタン（TimerStart/startCircle）と共通の円スタイル定数
+const CIRCLE_BG = '#fff79a';
+const CIRCLE_BORDER = '#f8cd71';
 const ICON_SIZE_STOP = 48;
 
 const TimerControls: FC<TimerControlsProps> = ({
@@ -55,6 +59,7 @@ const TimerControls: FC<TimerControlsProps> = ({
         ]}
       >
         <TimerBackgroundB width="100%" height="100%" style={styles.background} />
+        <View style={styles.circleBase} pointerEvents="none" />
 
         <View style={styles.contentArea}>
           {preparePhase === 'orin' && (orinCountdown ?? 0) > 0 ? (
@@ -120,9 +125,16 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#E8B04A',
-    borderRadius: 143,
+  },
+  circleBase: {
+    position: 'absolute',
+    top: 0,
+    width: 287,
+    height: 287,
+    borderRadius: 143.5,
+    backgroundColor: CIRCLE_BG,
+    borderWidth: 3,
+    borderColor: CIRCLE_BORDER,
   },
   contentArea: {
     flex: 1,
