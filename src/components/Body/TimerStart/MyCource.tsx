@@ -47,7 +47,7 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
                         MEDITATION_EMOJI[course.meditationTypes?.[i] ?? 'none'];
                       const timeStr =
                         t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`;
-                      return emoji ? `${emoji}${timeStr}` : timeStr;
+                      return emoji ? `${emoji} ${timeStr}` : timeStr;
                     })
                     .join('　')}
                 </Text>

@@ -72,9 +72,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
     backgroundColor: '#fff',
     borderRadius: 20,
     paddingVertical: 10,
@@ -101,6 +99,7 @@ const styles = StyleSheet.create({
   metaBlock: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-end',
     gap: 6,
   },
   modeArrow: {

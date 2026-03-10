@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, AppState } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, AppState, Image } from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
@@ -17,7 +17,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import Header from '../components/Header/Header';
-import AlermTime from '../components/Body/TimerStop/AlermTime';
 import Timer from '../components/Body/TimerStop/Timer';
 import PhaseProgressBar from '../components/feature/timer/PhaseProgressBar';
 import CurrentMeditationCard from '../components/feature/timer/CurrentMeditationCard';
@@ -686,6 +685,11 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           meditationTypes={meditationTypes}
           currentIdx={currentPhaseIdx}
         />
+        {/* mode▲/▼ + おりん補助行 */}
+        <View style={styles.subtleRow}>
+          <Text style={styles.subtleMeta}>{mode === 'countup' ? '▲' : '▼'}</Text>
+          <Image source={selectedOrin.image} style={styles.subtleOrin} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -694,6 +698,24 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { paddingVertical: 20, alignItems: 'center' },
+  subtleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+    opacity: 0.5,
+  },
+  subtleMeta: {
+    fontSize: 14,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  subtleOrin: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    borderRadius: 10,
+  },
 });
 
 export default TimerStop;
