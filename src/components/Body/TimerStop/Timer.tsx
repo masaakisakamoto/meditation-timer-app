@@ -19,7 +19,7 @@ export type TimerControlsProps = {
 };
 
 // Pick sizes that fit well
-const ICON_SIZE_PAUSE = 128;
+const ICON_SIZE_PAUSE = 100;
 const ICON_SIZE_STOP = 48;
 
 const TimerControls: FC<TimerControlsProps> = ({
@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 16,
   },
   background: {
     position: 'absolute',
@@ -150,7 +151,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
   },
   subtleTag: {
     flexDirection: 'row',
