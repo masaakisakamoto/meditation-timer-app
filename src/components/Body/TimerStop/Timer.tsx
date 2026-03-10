@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: 60,
     fontFamily: 'DidactGothic-Regular',
     color: '#000',
-    marginTop: 40,
+    marginTop: 60,
   },
   controls: {
     width: '100%',
