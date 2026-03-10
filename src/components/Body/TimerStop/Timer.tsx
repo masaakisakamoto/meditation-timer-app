@@ -120,6 +120,9 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#E8B04A',
+    borderRadius: 143,
   },
   contentArea: {
     flex: 1,
