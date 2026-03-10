@@ -56,19 +56,21 @@ const TimerControls: FC<TimerControlsProps> = ({
       >
         <TimerBackgroundB width="100%" height="100%" style={styles.background} />
 
-        {preparePhase === 'orin' && (orinCountdown ?? 0) > 0 ? (
-          <View style={styles.countdownBlock}>
-            <Text style={styles.countdownText}>{orinCountdown}</Text>
-            <Text style={styles.countdownLabel}>おりん終了後に開始</Text>
-          </View>
-        ) : preparePhase === 'reading' ? (
-          <View style={styles.preparingMessage}>
-            <Text style={styles.preparingText}>経典を読み上げています…</Text>
-            <Text style={styles.preparingText}>おりん終了後にタイマーが始まります</Text>
-          </View>
-        ) : (
-          <Text style={styles.timeText}>{time}</Text>
-        )}
+        <View style={styles.contentArea}>
+          {preparePhase === 'orin' && (orinCountdown ?? 0) > 0 ? (
+            <View style={styles.countdownBlock}>
+              <Text style={styles.countdownText}>{orinCountdown}</Text>
+              <Text style={styles.countdownLabel}>おりん終了後に開始</Text>
+            </View>
+          ) : preparePhase === 'reading' ? (
+            <View style={styles.preparingMessage}>
+              <Text style={styles.preparingText}>経典を読み上げています…</Text>
+              <Text style={styles.preparingText}>おりん終了後にタイマーが始まります</Text>
+            </View>
+          ) : (
+            <Text style={styles.timeText}>{time}</Text>
+          )}
+        </View>
 
         <View style={styles.controls}>
           <View style={styles.controlsRow}>
@@ -118,6 +120,10 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center',
+  },
+  contentArea: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
   },
   background: {
@@ -128,17 +134,13 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   timeText: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
+    alignSelf: 'stretch',
     textAlign: 'center',
     fontSize: 60,
     fontFamily: 'DidactGothic-Regular',
     color: '#000',
   },
   controls: {
-    position: 'absolute',
-    bottom: 0,
     width: '100%',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -182,9 +184,7 @@ const styles = StyleSheet.create({
     marginHorizontal: -10,
   },
   preparingMessage: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
+    alignSelf: 'stretch',
     alignItems: 'center',
     gap: 6,
   },
@@ -196,9 +196,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   countdownBlock: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
+    alignSelf: 'stretch',
     alignItems: 'center',
     gap: 4,
   },
