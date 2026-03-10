@@ -3,6 +3,7 @@ import React, { FC, useEffect, useRef } from 'react';
 import { Alert, Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import TimerBackgroundB from '../../../../assets/TimerBackGroundB.svg';
 import PauseIcon from '../../../../assets/PauseButton.svg';
+import PlayIcon from '../../../../assets/PlayButton.svg';
 import StopIcon from '../../../../assets/StopButton.svg';
 
 export type PreparePhase = 'reading' | 'orin' | 'running';
@@ -111,7 +112,11 @@ const TimerControls: FC<TimerControlsProps> = ({
         <View style={styles.bottomContent}>
           <View style={styles.controlsSection}>
             <Pressable onPress={onTogglePause}>
-              <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+              {isPlaying ? (
+                <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+              ) : (
+                <PlayIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+              )}
             </Pressable>
             <Pressable
               onPress={handleStop}
