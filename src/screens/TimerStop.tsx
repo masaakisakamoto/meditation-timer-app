@@ -16,7 +16,6 @@ import {
   View,
   Text,
   Pressable,
-  Image,
 } from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
@@ -689,12 +688,9 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
               }
             }, 100);
           }}
+          metaMode={mode}
+          metaOrinImage={selectedOrin.image}
         />
-        {/* mode▲/▼ + おりん補助行 */}
-        <View style={styles.subtleRow}>
-          <Text style={styles.subtleMeta}>{mode === 'countup' ? '▲' : '▼'}</Text>
-          <Image source={selectedOrin.image} style={styles.subtleOrin} />
-        </View>
         <CurrentMeditationCard
           meditationTypes={meditationTypes}
           currentIdx={currentPhaseIdx}
@@ -707,24 +703,6 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { paddingVertical: 20, alignItems: 'center' },
-  subtleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-    opacity: 0.5,
-  },
-  subtleMeta: {
-    fontSize: 14,
-    fontFamily: 'ZenMaruGothicMedium',
-    color: '#666',
-  },
-  subtleOrin: {
-    width: 20,
-    height: 20,
-    resizeMode: 'contain',
-    borderRadius: 10,
-  },
 });
 
 export default TimerStop;

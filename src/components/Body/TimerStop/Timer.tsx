@@ -1,6 +1,6 @@
 // src/components/Body/TimerStop/TimerControls.tsx
 import React, { FC, useEffect, useRef } from 'react';
-import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Animated, Image } from 'react-native';
 import TimerBackgroundB from '../../../../assets/TimerBackGroundB.svg';
 import PauseIcon from '../../../../assets/PauseButton.svg';
 import StopIcon from '../../../../assets/StopButton.svg';
@@ -14,6 +14,8 @@ export type TimerControlsProps = {
   onStop: () => void;
   preparePhase?: PreparePhase;
   orinCountdown?: number | null;
+  metaMode?: 'countup' | 'countdown';
+  metaOrinImage?: number;
 };
 
 // Pick sizes that fit well
@@ -27,6 +29,8 @@ const TimerControls: FC<TimerControlsProps> = ({
   onStop,
   preparePhase = 'running',
   orinCountdown = null,
+  metaMode,
+  metaOrinImage,
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
@@ -67,19 +71,29 @@ const TimerControls: FC<TimerControlsProps> = ({
         )}
 
         <View style={styles.controls}>
-          <Pressable onPress={onTogglePause} style={styles.pauseButton}>
-            <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
-          </Pressable>
+          <View style={styles.controlsRow}>
+            <Pressable onPress={onTogglePause} style={styles.pauseButton}>
+              <PauseIcon width={ICON_SIZE_PAUSE} height={ICON_SIZE_PAUSE} />
+            </Pressable>
 
-          <Pressable
-            onPress={onStop}
-            style={({ pressed }) => [
-              styles.stopButton,
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
-          </Pressable>
+            <Pressable
+              onPress={onStop}
+              style={({ pressed }) => [
+                styles.stopButton,
+                pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <StopIcon width={ICON_SIZE_STOP} height={ICON_SIZE_STOP} />
+            </Pressable>
+          </View>
+          {metaMode != null && metaOrinImage != null && (
+            <View style={styles.subtleTag}>
+              <Text style={styles.subtleTagText}>
+                {metaMode === 'countup' ? '▲' : '▼'}
+              </Text>
+              <Image source={metaOrinImage} style={styles.subtleTagOrin} />
+            </View>
+          )}
         </View>
       </Animated.View>
     </Animated.View>
@@ -126,9 +140,37 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'center', // center both buttons
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subtleTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#999',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    opacity: 0.6,
+    marginTop: 4,
+  },
+  subtleTagText: {
+    fontSize: 14,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  subtleTagOrin: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    borderRadius: 10,
   },
   pauseButton: {
     marginHorizontal: -20,
