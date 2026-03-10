@@ -160,6 +160,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     opacity: 0.6,
     marginTop: 4,
+    marginBottom: 8,
+    backgroundColor: 'rgba(255,255,255,0.6)',
   },
   subtleTagText: {
     fontSize: 14,
