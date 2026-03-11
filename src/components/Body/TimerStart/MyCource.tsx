@@ -28,7 +28,11 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
     <View style={styles.container}>
       <View style={[styles.titleRow, courses.length === 0 && styles.titleRowNoItems]}>
         <View style={styles.titleSpacer} />
-        <Text style={styles.titleText}>マイコース</Text>
+        <Text
+          style={[styles.titleText, courses.length === 0 && styles.titleTextDisabled]}
+        >
+          マイコース
+        </Text>
         <Pressable
           style={[
             styles.editButton,
@@ -154,6 +158,9 @@ const styles = StyleSheet.create({
   },
   editButtonDisabled: {
     opacity: 0.4,
+  },
+  titleTextDisabled: {
+    color: '#9ca3af',
   },
   editButtonText: {
     fontSize: 14,
