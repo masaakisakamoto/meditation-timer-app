@@ -29,6 +29,7 @@ import Timer from '../components/Body/TimerStop/Timer';
 import PhaseProgressBar from '../components/feature/timer/PhaseProgressBar';
 import CurrentMeditationCard from '../components/feature/timer/CurrentMeditationCard';
 import type { MeditationType } from '../types/meditation';
+import { MEDITATION_EMOJI, MEDITATION_LABEL } from '../types/meditation';
 import { RootStackParamList } from '../../App';
 import { ConfigContext } from '../context/ConfigContext';
 import { orinList } from './TimerConfig';
@@ -121,6 +122,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
   const [nextIdx, setNextIdx] = useState(0);
   // 開始前シーケンス（経典/おりん再生）中のフラグ
   const [isPreparingSequence, setIsPreparingSequence] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
   // ✅ 再生開始した瞬間に「開始時刻」を確定
   useEffect(() => {
@@ -521,6 +523,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
       setSec(mode === 'countdown' ? 0 : totalSec);
       setNextIdx(cumulativeSecs.length);
       setPlaying(false);
+      setIsFinished(true);
       return;
     }
 
@@ -633,6 +636,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
     // タイマー終了判定
     if ((mode === 'countup' && sec >= totalSec) || (mode === 'countdown' && sec <= 0)) {
       setPlaying(false);
+      setIsFinished(true);
     }
   }, [sec, mode, totalSec, cumulativeSecs, nextIdx, isPlaying, playTimerBell]);
 
@@ -660,6 +664,43 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         : 'running'; // おりん終了〜isPreparingSequence解除の間もrunningとして扱う
 
   /* ---------- UI ---------- */
+  if (isFinished) {
+    const totalMin = courseTimes.reduce((a, b) => a + b, 0);
+    const totalStr =
+      totalMin < 1
+        ? `${Math.round(totalMin * 60)}秒`
+        : totalMin >= 60
+          ? `${Math.floor(totalMin / 60)}時間${totalMin % 60 > 0 ? `${totalMin % 60}分` : ''}`
+          : `${totalMin}分`;
+    return (
+      <SafeAreaView style={styles.container}>
+        <Header title="タイマー" />
+        <ScrollView contentContainerStyle={styles.completionBody}>
+          <Text style={styles.completionTitle}>すべての瞑想が終了しました</Text>
+          <View style={styles.completionCard}>
+            {courseTimes.map((t, i) => {
+              const type = meditationTypes[i] ?? 'none';
+              const dur = t > 0 && t < 1 ? `${Math.round(t * 60)}秒` : `${t}分`;
+              const label =
+                type !== 'none'
+                  ? `${MEDITATION_EMOJI[type]} ${MEDITATION_LABEL[type]} (${dur})`
+                  : `タイマー${i + 1} (${dur})`;
+              return (
+                <Text key={i} style={styles.completionItem}>
+                  {label}
+                </Text>
+              );
+            })}
+          </View>
+          <Text style={styles.completionTotal}>合計 {totalStr}</Text>
+          <Pressable style={styles.completionButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.completionButtonText}>戻る</Text>
+          </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title="タイマー" />
@@ -704,6 +745,42 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#e0eef9' },
   body: { paddingVertical: 20, alignItems: 'center' },
+  completionBody: { flex: 1, paddingVertical: 40, alignItems: 'center', gap: 24 },
+  completionTitle: {
+    fontSize: 20,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  completionCard: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    gap: 10,
+  },
+  completionItem: {
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#374151',
+  },
+  completionTotal: {
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#6b7280',
+  },
+  completionButton: {
+    backgroundColor: '#fcdfa5',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+  },
+  completionButtonText: {
+    fontSize: 16,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#374151',
+    textAlign: 'center',
+  },
 });
 
 export default TimerStop;
