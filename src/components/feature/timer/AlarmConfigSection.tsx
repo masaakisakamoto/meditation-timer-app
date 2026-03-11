@@ -19,8 +19,8 @@ const formatMin = (min: number): string => {
 const TYPE_OPTIONS: { type: MeditationType; label: string }[] = [
   { type: 'none', label: '−' },
   { type: 'sitting', label: '🧘' },
-  { type: 'walking', label: '🚶' },
   { type: 'standing', label: '🧍' },
+  { type: 'walking', label: '🚶' },
 ];
 
 type Props = {

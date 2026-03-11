@@ -53,7 +53,7 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
               タイマー設定でマイコースを設定してください
             </Text>
             <Text style={styles.guideSubText}>
-              立つ瞑想・歩く瞑想・座る瞑想を組み合わせられます
+              座る瞑想・立つ瞑想・歩く瞑想を組み合わせられます
             </Text>
           </View>
         </View>
