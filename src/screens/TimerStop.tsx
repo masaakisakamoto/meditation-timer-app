@@ -673,6 +673,7 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
           preparePhase={preparePhase}
           orinCountdown={orinCountdown}
           onTogglePause={() => {
+            if (isPreparingSequence) return;
             setPlaying((p) => !p);
           }}
           onStop={() => {
