@@ -677,6 +677,8 @@ export const TimerStop: FC<Props> = ({ route, navigation }) => {
         <Header title="タイマー" />
         <ScrollView contentContainerStyle={styles.completionBody}>
           <Text style={styles.completionTitle}>すべての瞑想が終了しました</Text>
+          <Text style={styles.completionMessage}>おつかれさまでした</Text>
+          <Text style={styles.completionMessage}>今日も静かな時間を過ごせました</Text>
           <View style={styles.completionCard}>
             {courseTimes.map((t, i) => {
               const type = meditationTypes[i] ?? 'none';
@@ -763,6 +765,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#374151',
+  },
+  completionMessage: {
+    fontSize: 15,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#9ca3af',
+    textAlign: 'center',
   },
   completionTotal: {
     fontSize: 16,
