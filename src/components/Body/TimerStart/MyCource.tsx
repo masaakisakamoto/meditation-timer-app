@@ -52,6 +52,9 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
             <Text style={styles.guideText}>
               タイマー設定でマイコースを設定してください
             </Text>
+            <Text style={styles.guideSubText}>
+              立つ瞑想・歩く瞑想・座る瞑想を組み合わせられます
+            </Text>
           </View>
         </View>
       ) : (
@@ -226,6 +229,13 @@ const styles = StyleSheet.create({
     fontFamily: 'ZenMaruGothicMedium',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  guideSubText: {
+    fontSize: 12,
+    fontFamily: 'ZenMaruGothic-Medium',
+    color: '#9ca3af',
+    textAlign: 'center',
+    marginTop: 4,
   },
   courseRow: {
     flexDirection: 'row',
