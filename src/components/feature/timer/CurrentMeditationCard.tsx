@@ -32,14 +32,21 @@ const CurrentMeditationCard: FC<Props> = ({
     currentType !== 'none' ||
     (nextType !== null && nextType !== 'none') ||
     (lastType !== null && lastType !== 'none');
-  if (!hasAny) return null;
+  const hasTimes = courseTimes != null && courseTimes.some((t) => t > 0);
+  if (!hasAny && !hasTimes) return null;
 
   type SubRow = { label: string; type: MeditationType; idx: number };
   const subRows: SubRow[] = [];
-  if (nextType !== null && nextType !== 'none') {
+  if (
+    nextType !== null &&
+    (nextType !== 'none' || formatDur(courseTimes?.[currentIdx + 1]) != null)
+  ) {
     subRows.push({ label: '次', type: nextType, idx: currentIdx + 1 });
   }
-  if (lastType !== null && lastType !== 'none') {
+  if (
+    lastType !== null &&
+    (lastType !== 'none' || formatDur(courseTimes?.[lastIdx]) != null)
+  ) {
     subRows.push({ label: '最後', type: lastType, idx: lastIdx });
   }
 
@@ -62,6 +69,21 @@ const CurrentMeditationCard: FC<Props> = ({
         </View>
       )}
 
+      {currentType === 'none' && (
+        <View style={styles.currentBlock}>
+          <View style={styles.currentLabelRow}>
+            <Text style={styles.currentLabel}>タイマー{currentIdx + 1}</Text>
+            {formatDur(courseTimes?.[currentIdx]) != null && (
+              <Text style={styles.durText}>
+                {' '}
+                ({formatDur(courseTimes?.[currentIdx])})
+              </Text>
+            )}
+          </View>
+          <Text style={styles.currentCaption}>現在フェーズ</Text>
+        </View>
+      )}
+
       {/* 中段: 次 / 最後 */}
       {subRows.length > 0 && (
         <View style={styles.subBlock}>
@@ -70,7 +92,9 @@ const CurrentMeditationCard: FC<Props> = ({
               <Text style={styles.subLabel}>{label}</Text>
               <View style={styles.subValueRow}>
                 <Text style={styles.subValue} numberOfLines={1}>
-                  {MEDITATION_EMOJI[type]} {MEDITATION_LABEL[type]}
+                  {type !== 'none'
+                    ? `${MEDITATION_EMOJI[type]} ${MEDITATION_LABEL[type]}`
+                    : `タイマー${idx + 1}`}
                 </Text>
                 {formatDur(courseTimes?.[idx]) != null && (
                   <Text style={styles.durText}> ({formatDur(courseTimes?.[idx])})</Text>
