@@ -76,6 +76,9 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
               onPress={() => !isEditing && onSelect(course)}
             >
               <View style={styles.courseRow}>
+                {selectedId === course.id && (
+                  <Text style={styles.selectedDot}>●</Text>
+                )}
                 <View style={styles.timesBlock}>
                   <Text
                     style={styles.selectText}
@@ -187,6 +190,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginLeft: 10,
+  },
+  selectedDot: {
+    marginRight: 8,
+    fontSize: 10,
+    color: '#d97706',
+    fontFamily: 'ZenMaruGothic-Medium',
   },
   selectButtonPressed: {
     transform: [{ scale: 0.97 }],
