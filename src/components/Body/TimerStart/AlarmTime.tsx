@@ -33,7 +33,12 @@ const AlarmTime: FC<Props> = ({
         ) : (
           <>
             <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
-              <Text style={styles.timesText}>
+              <Text
+                style={styles.timesText}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
                 {display
                   .map((t, i) => {
                     const emoji = MEDITATION_EMOJI[meditationTypes?.[i] ?? 'none'];
@@ -99,7 +104,7 @@ const styles = StyleSheet.create({
   metaBlock: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-end',
+    alignSelf: 'center',
     gap: 6,
   },
   modeArrow: {
