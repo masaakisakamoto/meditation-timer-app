@@ -40,7 +40,12 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
           >
             <View style={styles.courseRow}>
               <View style={styles.timesBlock}>
-                <Text style={styles.selectText}>
+                <Text
+                  style={styles.selectText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                >
                   {course.times
                     .map((t, i) => {
                       const emoji =
@@ -82,7 +87,7 @@ export default MyCource;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     marginVertical: 16,
   },
   title: {
