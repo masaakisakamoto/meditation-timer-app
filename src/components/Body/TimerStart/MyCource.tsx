@@ -76,9 +76,7 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
               onPress={() => !isEditing && onSelect(course)}
             >
               <View style={styles.courseRow}>
-                {selectedId === course.id && (
-                  <Text style={styles.selectedDot}>●</Text>
-                )}
+                {selectedId === course.id && <Text style={styles.selectedDot}>●</Text>}
                 <View style={styles.timesBlock}>
                   <Text
                     style={styles.selectText}
