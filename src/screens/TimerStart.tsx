@@ -107,13 +107,13 @@ export const TimerStart: FC = () => {
           isReading={readingOn} // ← グローバルから
           toggleReading={toggleReading} // ← グローバル setter
           hasSelectedCourse={courseTimes.length > 0}
+          mode={mode}
+          orinImage={(orinList.find((o) => o.id === ringType) ?? orinList[0]).image}
         />
 
         {/* ② アラーム時間 */}
         <AlarmTime
           times={courseTimes}
-          mode={mode}
-          ringType={ringType}
           meditationTypes={courseMeditationTypes}
           showSelectCourseMessage={courses.length > 0 && !courseTimes.some((t) => t > 0)}
         />

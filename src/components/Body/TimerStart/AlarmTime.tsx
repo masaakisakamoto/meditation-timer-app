@@ -1,28 +1,18 @@
 // src/components/Body/TimerStart/AlarmTime.tsx
 import React, { FC } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { orinList } from '../../../screens/TimerConfig';
+import { View, Text, StyleSheet } from 'react-native';
 import type { MeditationType } from '../../../types/meditation';
 import { MEDITATION_EMOJI } from '../../../types/meditation';
 
 type Props = {
   times: number[];
-  mode: string;
-  ringType: string;
   showSelectCourseMessage?: boolean;
   meditationTypes?: MeditationType[];
 };
 
-const AlarmTime: FC<Props> = ({
-  times,
-  mode,
-  ringType,
-  showSelectCourseMessage,
-  meditationTypes,
-}) => {
+const AlarmTime: FC<Props> = ({ times, showSelectCourseMessage, meditationTypes }) => {
   const display = [times[0] ?? 0, times[1] ?? 0, times[2] ?? 0];
   const hasAnyTime = display.some((t) => t > 0);
-  const orin = orinList.find((o) => o.id === ringType) ?? orinList[0];
 
   return (
     <View style={styles.wrapper}>
@@ -48,12 +38,6 @@ const AlarmTime: FC<Props> = ({
                   .join('　')}
               </Text>
             </View>
-            {hasAnyTime && (
-              <View style={styles.metaBlock}>
-                <Text style={styles.modeArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
-                <Image source={orin.image} style={styles.orinThumb} />
-              </View>
-            )}
           </>
         )}
       </View>
@@ -100,22 +84,5 @@ const styles = StyleSheet.create({
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#6b7280',
     textAlign: 'center',
-  },
-  metaBlock: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    gap: 6,
-  },
-  modeArrow: {
-    fontSize: 20,
-    fontFamily: 'ZenMaruGothicMedium',
-    color: '#666',
-  },
-  orinThumb: {
-    width: 28,
-    height: 28,
-    resizeMode: 'cover',
-    borderRadius: 14,
   },
 });

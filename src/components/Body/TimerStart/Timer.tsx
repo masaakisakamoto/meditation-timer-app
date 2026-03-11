@@ -20,6 +20,8 @@ interface TimerProps {
   isReading: boolean;
   toggleReading: () => void;
   hasSelectedCourse?: boolean;
+  mode?: 'countup' | 'countdown';
+  orinImage?: number;
 }
 
 const TimerStartDisplay: FC<TimerProps> = ({
@@ -28,6 +30,8 @@ const TimerStartDisplay: FC<TimerProps> = ({
   isReading,
   toggleReading,
   hasSelectedCourse = true,
+  mode,
+  orinImage,
 }) => {
   const breathOpacity = useRef(new Animated.Value(1)).current;
   const breathScale = useRef(new Animated.Value(1)).current;
@@ -103,6 +107,14 @@ const TimerStartDisplay: FC<TimerProps> = ({
 
         {/* 残り時間 */}
         <Text style={styles.timeText}>{time}</Text>
+
+        {/* モード + おりん（円の底部） */}
+        {orinImage != null && (
+          <View style={styles.metaTag}>
+            <Text style={styles.metaArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
+            <Image source={orinImage} style={styles.metaOrin} />
+          </View>
+        )}
       </Animated.View>
     </SafeAreaView>
   );
@@ -205,5 +217,28 @@ const styles = StyleSheet.create({
     fontFamily: 'DidactGothic-Regular',
     fontSize: 60,
     color: '#000',
+  },
+  metaTag: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    paddingBottom: 12,
+    opacity: 0.5,
+  },
+  metaArrow: {
+    fontSize: 14,
+    fontFamily: 'ZenMaruGothicMedium',
+    color: '#666',
+  },
+  metaOrin: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    borderRadius: 10,
   },
 });
