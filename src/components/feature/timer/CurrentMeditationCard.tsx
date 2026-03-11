@@ -1,6 +1,6 @@
 // src/components/feature/timer/CurrentMeditationCard.tsx
-import React, { FC } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { FC, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import type { MeditationType } from '../../../types/meditation';
 import { MEDITATION_EMOJI, MEDITATION_LABEL } from '../../../types/meditation';
 
@@ -20,6 +20,19 @@ const CurrentMeditationCard: FC<Props> = ({
   currentIdx,
   courseTimes,
 }) => {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    fadeAnim.setValue(0);
+    slideAnim.setValue(6);
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 350, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
+    ]).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIdx]);
+
   const total = meditationTypes.length;
   const currentType = meditationTypes[currentIdx] ?? 'none';
   const nextType = total >= 2 ? (meditationTypes[currentIdx + 1] ?? null) : null;
@@ -52,37 +65,41 @@ const CurrentMeditationCard: FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      {/* 上段: 現在フェーズを大きく（none のときは非表示） */}
-      {currentType !== 'none' && (
-        <View style={styles.currentBlock}>
-          <Text style={styles.currentEmoji}>{MEDITATION_EMOJI[currentType]}</Text>
-          <View style={styles.currentLabelRow}>
-            <Text style={styles.currentLabel}>{MEDITATION_LABEL[currentType]}</Text>
-            {formatDur(courseTimes?.[currentIdx]) != null && (
-              <Text style={styles.durText}>
-                {' '}
-                ({formatDur(courseTimes?.[currentIdx])})
-              </Text>
-            )}
+      <Animated.View
+        style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
+      >
+        {/* 上段: 現在フェーズを大きく（none のときは非表示） */}
+        {currentType !== 'none' && (
+          <View style={styles.currentBlock}>
+            <Text style={styles.currentEmoji}>{MEDITATION_EMOJI[currentType]}</Text>
+            <View style={styles.currentLabelRow}>
+              <Text style={styles.currentLabel}>{MEDITATION_LABEL[currentType]}</Text>
+              {formatDur(courseTimes?.[currentIdx]) != null && (
+                <Text style={styles.durText}>
+                  {' '}
+                  ({formatDur(courseTimes?.[currentIdx])})
+                </Text>
+              )}
+            </View>
+            <Text style={styles.currentCaption}>現在フェーズ</Text>
           </View>
-          <Text style={styles.currentCaption}>現在フェーズ</Text>
-        </View>
-      )}
+        )}
 
-      {currentType === 'none' && (
-        <View style={styles.currentBlock}>
-          <View style={styles.currentLabelRow}>
-            <Text style={styles.currentLabel}>タイマー{currentIdx + 1}</Text>
-            {formatDur(courseTimes?.[currentIdx]) != null && (
-              <Text style={styles.durText}>
-                {' '}
-                ({formatDur(courseTimes?.[currentIdx])})
-              </Text>
-            )}
+        {currentType === 'none' && (
+          <View style={styles.currentBlock}>
+            <View style={styles.currentLabelRow}>
+              <Text style={styles.currentLabel}>タイマー{currentIdx + 1}</Text>
+              {formatDur(courseTimes?.[currentIdx]) != null && (
+                <Text style={styles.durText}>
+                  {' '}
+                  ({formatDur(courseTimes?.[currentIdx])})
+                </Text>
+              )}
+            </View>
+            <Text style={styles.currentCaption}>現在フェーズ</Text>
           </View>
-          <Text style={styles.currentCaption}>現在フェーズ</Text>
-        </View>
-      )}
+        )}
+      </Animated.View>
 
       {/* 中段: 次 / 最後 */}
       {subRows.length > 0 && (
