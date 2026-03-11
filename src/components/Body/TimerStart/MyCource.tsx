@@ -65,9 +65,10 @@ const MyCource: FC<Props> = ({ courses, orins, selectedId, onSelect, onDelete })
             )}
             {/* 選択ボタン */}
             <Pressable
-              style={[
+              style={({ pressed }) => [
                 styles.selectButton,
                 selectedId === course.id && styles.selectButtonSelected,
+                pressed && styles.selectButtonPressed,
               ]}
               onPress={() => !isEditing && onSelect(course)}
             >
@@ -183,6 +184,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginLeft: 10,
+  },
+  selectButtonPressed: {
+    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
   },
   selectButtonSelected: {
     backgroundColor: '#fff3d0',
