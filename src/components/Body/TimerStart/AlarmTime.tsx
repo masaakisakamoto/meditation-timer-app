@@ -22,7 +22,7 @@ const AlarmTime: FC<Props> = ({ times, showSelectCourseMessage, meditationTypes 
           <Text style={styles.guidanceText}>マイコースを選択してください</Text>
         ) : (
           <>
-            <View style={[styles.timesBlock, !hasAnyTime && styles.timesBlockCentered]}>
+            <View style={!hasAnyTime ? styles.timesBlockCentered : undefined}>
               <Text
                 style={styles.timesText}
                 numberOfLines={1}
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     width: '95%',
     paddingHorizontal: 18,
     marginVertical: 10,
+    alignItems: 'center',
   },
   title: {
     fontSize: 18,
@@ -67,9 +68,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
-  timesBlock: {
-    flex: 1,
-  },
   timesBlockCentered: {
     alignItems: 'center',
   },
@@ -77,9 +75,9 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#000',
+    textAlign: 'center',
   },
   guidanceText: {
-    flex: 1,
     fontSize: 16,
     fontFamily: 'ZenMaruGothic-Medium',
     color: '#6b7280',

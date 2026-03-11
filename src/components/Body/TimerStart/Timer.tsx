@@ -111,8 +111,10 @@ const TimerStartDisplay: FC<TimerProps> = ({
         {/* モード + おりん（円の底部） */}
         {orinImage != null && (
           <View style={styles.metaTag}>
-            <Text style={styles.metaArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
-            <Image source={orinImage} style={styles.metaOrin} />
+            <View style={styles.metaTagInner}>
+              <Text style={styles.metaArrow}>{mode === 'countup' ? '▲' : '▼'}</Text>
+              <Image source={orinImage} style={styles.metaOrin} />
+            </View>
           </View>
         )}
       </Animated.View>
@@ -229,6 +231,16 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingBottom: 12,
     opacity: 0.5,
+  },
+  metaTagInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   metaArrow: {
     fontSize: 14,
